@@ -55,10 +55,8 @@ fn get_ws<'a>(env: &mut JNIEnv<'a>, class:&JObject) ->std::result::Result<*const
     }
 }
 
-pub(crate) fn connect_ws(env: JNIEnv, class: &JObject, config: Config) ->std::result::Result<(), String> {
+pub fn connect_ws(env: JNIEnv, class: &JObject, config: Config) ->std::result::Result<(), String> {
     let url = format!("{}://{}:{}", config.protocol, config.host, config.host);
-
-
 
     match connect(url, |sender| {
         WSClient {
@@ -69,5 +67,25 @@ pub(crate) fn connect_ws(env: JNIEnv, class: &JObject, config: Config) ->std::re
     }) {
         Ok(_) => Ok(()),
         Err(err) => Err(format!("Error connecting to ws: {}", err)),
+    }
+}
+
+pub fn send(env: &mut JNIEnv, class: &JObject, msg: &WSMessage) -> std::result::Result<(), String> {
+    match get_ws(env, class) {
+        Ok(ws_ptr) => {
+            let ws: &WSClient = unsafe { &*ws_ptr };
+            return match msg.clone().into_text() {
+                Ok(text) => {
+                    match ws.sender.send(text) {
+                        Ok(_) => Ok(()),
+                        Err(err) => Err(format!("Error sending message: {}", err)),
+                    }
+                },
+                Err(err) => {
+                    Err(format!("Error converting message to text: {}", err))
+                },
+            }
+        }
+        Err(err) => Err(format!("Error getting ws: {}", err)),
     }
 }
