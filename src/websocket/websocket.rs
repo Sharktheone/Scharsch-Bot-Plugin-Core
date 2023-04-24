@@ -1,7 +1,8 @@
 use jni::JNIEnv;
 use jni::objects::{JObject, JValue};
-use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode};
+use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode, Message};
 use crate::config::config_format::Config;
+use crate::plugin::logger::{info, warn, error};
 
 
 pub struct WSClient<'a> {
@@ -16,7 +17,7 @@ impl <'a> Handler for WSClient<'a> {
         let client_pointer = client as i64;
         let mut env = unsafe { self.env.unsafe_clone() };
         if let Err(err) = store_ws(&mut env, self.class, client_pointer) {
-            println!("Error storing ws pointer: {}", err);
+            error(&mut env, self.class, format!("Error storing ws pointer: {}", err));
         }
         Ok(())
     }
@@ -70,7 +71,7 @@ pub fn connect_ws(env: JNIEnv, class: &JObject, config: Config) ->std::result::R
     }
 }
 
-pub fn send(env: &mut JNIEnv, class: &JObject, msg: &WSMessage) -> std::result::Result<(), String> {
+pub fn send(env: &mut JNIEnv, class: &JObject, msg: Message) -> std::result::Result<(), String> {
     match get_ws(env, class) {
         Ok(ws_ptr) => {
             let ws: &WSClient = unsafe { &*ws_ptr };

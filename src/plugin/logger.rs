@@ -22,7 +22,7 @@ pub fn set_loggers(info: fn(&str) -> Result<(), String>, warn: fn(&str) -> Resul
 
     match env.set_field(class, "logger", "J", JValue::Long(ptr)) {
         Ok(_) => (),
-        Err(err) => eprintln!("Error setting logger: {}", err),
+        Err(err) => error_no_env(format!("Error setting logger: {}", err)),
     }
 }
 
@@ -58,14 +58,14 @@ pub fn info<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: &str) {
                 Ok(_) => (),
                 Err(err) => {
                     eprintln!("{}", format!("Error logging info: {}", err).red());
-                    println!("[{} INFO] [ScharschBot/core] {}", time(), msg);
+                    info_no_env(msg);
 
                 },
             };
         }
         Err(err) => {
             eprintln!("{}", format!("Error getting logger: {}", err).red());
-            println!("[{} INFO] [ScharschBot/core] {}", time(), msg);
+            info_no_env(msg);
         },
     }
 }
@@ -78,32 +78,44 @@ pub fn warn<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: &str) {
                 Ok(_) => (),
                 Err(err) => {
                     eprintln!("{}", format!("Error logging warn: {}", err).red());
-                    println!("{}", format!("[{} WARN] [ScharschBot/core] {}", time(), msg).yellow());
+                    warn_no_env(msg);
                 },
             };
         }
         Err(err) => {
             eprintln!("{}", format!("Error getting logger: {}", err).red());
-            println!("{}", format!("[{} WARN] [ScharschBot/core] {}", time(), msg).yellow());
+            warn_no_env(msg);
         },
     }
 }
 
-pub fn error<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: &str) {
+pub fn error<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
     match get_loggers(env, class) {
         Ok(logger_ptr) => {
             let logger: &Logger = unsafe { &*logger_ptr };
-            match (logger.error)(msg) {
+            match (logger.error)(&*msg) {
                 Ok(_) => (),
                 Err(err) => {
                     eprintln!("{}", format!("Error logging error: {}", err).red());
-                    println!("{}", format!("[{} ERROR] [ScharschBot/core] {}", time(), msg).red());
+                    error_no_env(msg);
                 },
             };
         }
         Err(err) => {
             eprintln!("{}", format!("Error getting logger: {}", err).red());
-            println!("{}", format!("[{} ERROR] [ScharschBot/core] {}", time(), msg).red());
+            error_no_env(msg);
         },
     }
+}
+
+pub fn info_no_env(msg: &str) {
+    println!("[{} INFO] [ScharschBot/core] {}", time(), msg);
+}
+
+pub fn warn_no_env(msg: &str) {
+    println!("{}", format!("[{} WARN] [ScharschBot/core] {}", time(), msg).yellow());
+}
+
+pub fn error_no_env(msg: String) {
+    println!("{}", format!("[{} ERROR] [ScharschBot/core] {}", time(), msg).red());
 }

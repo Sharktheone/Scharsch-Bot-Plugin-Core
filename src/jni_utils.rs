@@ -1,5 +1,6 @@
 use jni::JNIEnv;
 use jni::objects::{JObject, JString, JValue};
+use crate::plugin::logger::{error, error_no_env};
 
 
 #[allow(unused)]
@@ -73,7 +74,7 @@ pub fn call_stacking<'a, 'b>(env: &mut JNIEnv<'a>, obj: JObject<'b>, jfn: &[JniF
         obj = match env.call_method(obj, &f.name, signature, f.args) {
             Ok(name) => name.l().unwrap(),
             Err(e) => {
-                eprintln!("Error calling jni method {}: {}", f.name, e);
+                error_no_env(format!("Error calling jni method {}: {}", f.name, e));
                 return JObject::null();
             }
         };
@@ -84,7 +85,7 @@ pub fn convert_string(env: &mut JNIEnv, obj: JObject) -> String {
     match env.get_string(JString::from(obj).as_ref()) {
         Ok(s) => s.into(),
         Err(e) => {
-            eprintln!("Error getting string: {}", e);
+            error_no_env(format!("Error getting string: {}", e));
             return String::from("");
         }
     }
