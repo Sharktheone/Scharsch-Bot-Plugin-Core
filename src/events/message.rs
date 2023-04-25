@@ -1,33 +1,33 @@
 use serde::{Deserialize, Serialize};
 
-pub const SEND_PLAYERS: String = String::from("sendPlayers");
-pub const KICK_PLAYER: String = String::from("kickPlayer");
-pub const REPORT_PLAYER: String = String::from("reportPlayer");
-pub const BAN_PLAYER: String = String::from("banPlayer");
-pub const UNBAN_PLAYER: String = String::from("unbanPlayer");
-pub const SEND_COMMAND: String = String::from("sendCommand");
-pub const SEND_CHAT_MESSAGE: String = String::from("sendChatMessage");
-pub const PLAYER_JOINED: String = String::from("playerJoined");
-pub const PLAYER_LEFT: String = String::from("playerLeft");
-pub const PLAYERS: String = String::from("players");
-pub const CHAT_MESSAGE: String = String::from("chatMessage");
-pub const PLAYER_DEATH: String = String::from("playerDeath");
-pub const PLAYER_ADVANCEMENT: String = String::from("playerAdvancement");
-pub const AUTH: String = String::from("auth");
-pub const AUTH_SUCCESS: String = String::from("authSuccess");
-pub const AUTH_FAILED: String = String::from("authFailed");
-pub const ERROR: String = String::from("error");
+pub const SEND_PLAYERS: &str = "sendPlayers";
+pub const KICK_PLAYER: &str = "kickPlayer";
+pub const REPORT_PLAYER: &str = "reportPlayer";
+pub const BAN_PLAYER: &str = "banPlayer";
+pub const UNBAN_PLAYER: &str = "unbanPlayer";
+pub const SEND_COMMAND: &str = "sendCommand";
+pub const SEND_CHAT_MESSAGE: &str = "sendChatMessage";
+pub const PLAYER_JOINED: &str = "playerJoined";
+pub const PLAYER_LEFT: &str = "playerLeft";
+pub const PLAYERS: &str = "players";
+pub const CHAT_MESSAGE: &str = "chatMessage";
+pub const PLAYER_DEATH: &str = "playerDeath";
+pub const PLAYER_ADVANCEMENT: &str = "playerAdvancement";
+pub const AUTH: &str = "auth";
+pub const AUTH_SUCCESS: &str = "authSuccess";
+pub const AUTH_FAILED: &str = "authFailed";
+pub const ERROR: &str = "error";
 
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Message {
-    pub event: String,
+#[derive(Debug, Deserialize, Serialize, Default)]
+pub struct Message<'a> {
+    pub event: &'a str,
     #[serde(flatten)]
     pub data: MessageData,
 
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Default)]
 pub struct MessageData {
     pub players: Option<Vec<String>>,
     pub player: Option<String>,
