@@ -1,12 +1,14 @@
 use jni::JNIEnv;
 use jni::objects::{JObject, JValue};
-use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode};
+use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode, connect_with_config};
 use crate::config::config_format::Config;
-use crate::plugin::logger::{error};
+use crate::plugin::logger::{error, info};
 use crate::events::message::{Message};
+use base64::{Engine as _, engine::{self, general_purpose as b64}, alphabet};
 
 
 pub struct WSClient<'a> {
+    config: Config,
     sender: Sender,
     env:&'a JNIEnv<'a>,
     class:&'a JObject<'a>,
@@ -17,9 +19,28 @@ impl <'a> Handler for WSClient<'a> {
         let client:*const WSClient = self;
         let client_pointer = client as i64;
         let mut env = unsafe { self.env.unsafe_clone() };
+        info(&mut env, self.class, "Storing ws pointer".to_string());
         if let Err(err) = store_ws(&mut env, self.class, client_pointer) {
             error(&mut env, self.class, format!("Error storing ws pointer: {}", err));
         }
+        let mut auth= r#"
+        {
+            "event": "auth",
+            "data": {
+                "user": "{user}",
+                "password": "{password}"
+                }
+        }
+        "#;
+
+        auth = &*auth.replace("{user}", &self.config.user);
+        auth = &*auth.replace("{password}", &self.config.password);
+
+
+        match self.sender.send(auth){
+            Ok(_) => {},
+            Err(err) => error(&mut env, self.class, format!("Error sending auth message: {}", err)),
+        };
         Ok(())
     }
 
@@ -34,7 +55,6 @@ impl <'a> Handler for WSClient<'a> {
 }
 
 fn store_ws(env: &mut JNIEnv, class:&JObject, ptr:i64) ->std::result::Result<(),jni::errors::Error>{
-
     env.set_field(class, "ws_ptr", "J", JValue::Long(ptr))
 }
 
@@ -58,10 +78,11 @@ fn get_ws<'a>(env: &mut JNIEnv<'a>, class:&JObject) ->std::result::Result<*const
 }
 
 pub fn connect_ws(env: &mut JNIEnv, class: &JObject, config: Config) ->std::result::Result<(), String> {
-    let url = format!("{}://{}:{}", config.protocol, config.host, config.host);
+    let url = format!("{}://{}:{}/{}", config.protocol, config.host, config.port, config.serverid);
 
     match connect(url, |sender| {
         WSClient {
+            config,
             sender,
             env: &env,
             class:&class,
