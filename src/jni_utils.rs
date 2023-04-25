@@ -1,45 +1,45 @@
 use jni::JNIEnv;
 use jni::objects::{JObject, JString, JValue};
-use crate::plugin::logger::{error, error_no_env};
+use crate::plugin::logger::{error_no_env};
 
 
 #[allow(unused)]
-pub(crate) const JVOID: &str = "V";
+pub const JVOID: &str = "V";
 
 #[allow(unused)]
-pub(crate) const JBOOLEAN: &str = "Z";
+pub const JBOOLEAN: &str = "Z";
 
 #[allow(unused)]
-pub(crate) const JBYTE: &str = "B";
+pub const JBYTE: &str = "B";
 
 #[allow(unused)]
-pub(crate) const JCHAR: &str = "C";
+pub const JCHAR: &str = "C";
 
 #[allow(unused)]
-pub(crate) const JSHORT: &str = "S";
+pub const JSHORT: &str = "S";
 
 #[allow(unused)]
-pub(crate) const JINT: &str = "I";
+pub const JINT: &str = "I";
 
 #[allow(unused)]
-pub(crate) const JLONG: &str = "J";
+pub const JLONG: &str = "J";
 
 #[allow(unused)]
-pub(crate) const JFLOAT: &str = "F";
+pub const JFLOAT: &str = "F";
 
 #[allow(unused)]
-pub(crate) const JDOUBLE: &str = "D";
+pub const JDOUBLE: &str = "D";
 
 #[allow(unused)]
-pub(crate) const JSTRING: &str = "Ljava/lang/String;";
+pub const JSTRING: &str = "Ljava/lang/String;";
 
 #[allow(unused)]
 
 pub struct JniFn<'a> {
-    pub(crate) name: &'a str,
-    pub(crate) input: &'a [String],
-    pub(crate) output: &'a str,
-    pub(crate) args: &'a [JValue<'a, 'a>],
+    pub name: &'a str,
+    pub input: &'a [String],
+    pub output: &'a str,
+    pub args: &'a [JValue<'a, 'a>],
 }
 
 fn assemble_signature(input: &[String], output: &String) -> String {
