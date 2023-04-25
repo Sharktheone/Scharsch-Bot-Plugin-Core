@@ -60,8 +60,8 @@ pub struct Config {
     pub(crate) user: String,
     pub(crate) password: String,
     pub(crate) servername: String,
-    #[serde(flatten)]
-    pub(crate) servernameoverrides: Vec<ServerNameOverride>,
+    // #[serde(flatten)]
+    // pub(crate) servernameoverrides: Vec<ServerNameOverride>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
