@@ -57,6 +57,7 @@ pub struct Config {
     pub(crate) protocol: String,
     pub(crate) host: String,
     pub(crate) port: u16,
+    pub(crate) serverid: String,
     pub(crate) user: String,
     pub(crate) password: String,
     pub(crate) servername: String,

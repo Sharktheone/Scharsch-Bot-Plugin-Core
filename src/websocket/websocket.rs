@@ -1,14 +1,14 @@
 use jni::JNIEnv;
 use jni::objects::{JObject, JValue};
-use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode, connect_with_config};
+use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode};
 use crate::config::config_format::Config;
 use crate::plugin::logger::{error, info};
 use crate::events::message::{Message};
-use base64::{Engine as _, engine::{self, general_purpose as b64}, alphabet};
 
 
 pub struct WSClient<'a> {
-    config: Config,
+    password: String,
+    user: String,
     sender: Sender,
     env:&'a JNIEnv<'a>,
     class:&'a JObject<'a>,
@@ -23,7 +23,7 @@ impl <'a> Handler for WSClient<'a> {
         if let Err(err) = store_ws(&mut env, self.class, client_pointer) {
             error(&mut env, self.class, format!("Error storing ws pointer: {}", err));
         }
-        let mut auth= r#"
+        let auth_base= r#"
         {
             "event": "auth",
             "data": {
@@ -33,8 +33,10 @@ impl <'a> Handler for WSClient<'a> {
         }
         "#;
 
-        auth = &*auth.replace("{user}", &self.config.user);
-        auth = &*auth.replace("{password}", &self.config.password);
+        let mut auth = auth_base.to_string();
+
+        auth = auth.replace("{user}", &mut self.user);
+        auth = auth.replace("{password}", &mut self.password);
 
 
         match self.sender.send(auth){
@@ -82,7 +84,8 @@ pub fn connect_ws(env: &mut JNIEnv, class: &JObject, config: Config) ->std::resu
 
     match connect(url, |sender| {
         WSClient {
-            config,
+            password: config.password.to_string(),
+            user: config.user.to_string(),
             sender,
             env: &env,
             class:&class,
