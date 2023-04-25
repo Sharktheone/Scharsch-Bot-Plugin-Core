@@ -35,11 +35,11 @@ impl <'a> Handler for WSClient<'a> {
 
 fn store_ws(env: &mut JNIEnv, class:&JObject, ptr:i64) ->std::result::Result<(),jni::errors::Error>{
 
-    env.set_field(class, "ws", "J", JValue::Long(ptr))
+    env.set_field(class, "ws_ptr", "J", JValue::Long(ptr))
 }
 
 fn get_ws<'a>(env: &mut JNIEnv<'a>, class:&JObject) ->std::result::Result<*const WSClient<'a>, String>{
-    match env.get_field(class, "ws", "J") {
+    match env.get_field(class, "ws_ptr", "J") {
         Ok(ptr_val) => {
             match ptr_val.j(){
                 Ok(ptr_j) => {

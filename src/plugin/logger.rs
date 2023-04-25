@@ -20,7 +20,7 @@ pub fn set_loggers(info: fn(&str) -> Result<(), String>, warn: fn(&str) -> Resul
     let logger_ptr: *const Logger = &logger;
     let ptr = logger_ptr as i64;
 
-    match env.set_field(class, "logger", "J", JValue::Long(ptr)) {
+    match env.set_field(class, "logger_ptr", "J", JValue::Long(ptr)) {
         Ok(_) => (),
         Err(err) => error_no_env(format!("Error setting logger: {}", err)),
     }
@@ -32,7 +32,7 @@ fn time() -> String {
 }
 
 fn get_loggers<'a>(env: &mut JNIEnv<'a>, class: &JObject) -> Result<*const Logger, String> {
-    match env.get_field(class, "logger", "J") {
+    match env.get_field(class, "logger_ptr", "J") {
         Ok(ptr_val) => {
             match ptr_val.j() {
                 Ok(ptr_j) => {
