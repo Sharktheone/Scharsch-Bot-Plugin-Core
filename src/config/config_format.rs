@@ -59,13 +59,13 @@ pub struct Config {
     pub(crate) port: u16,
     pub(crate) user: String,
     pub(crate) password: String,
-    pub(crate) server_name: String,
+    pub(crate) servername: String,
     #[serde(flatten)]
-    pub(crate) server_name_overrides: ServerNameOverride,
+    pub(crate) servernameoverrides: Vec<ServerNameOverride>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ServerNameOverride {
-    pub(crate) server_name: String,
-    pub(crate) server_name_override: String,
+    pub(crate) name: String,
+    pub(crate) nameoverride: String,
 }
