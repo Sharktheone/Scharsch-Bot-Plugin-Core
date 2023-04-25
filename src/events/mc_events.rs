@@ -1,20 +1,53 @@
 use jni::JNIEnv;
 use jni::objects::JObject;
-use crate::events::message::{Message, MessageData};
+use crate::events::message::{CHAT_MESSAGE, Message, MessageData, PLAYER_JOINED, PLAYER_LEFT};
+use crate::plugin::logger::{warn};
 use crate::websocket::websocket::send;
 
-fn player_join(env: &mut JNIEnv, class: &JObject, name: String) {
-    println!("Player joined: {}", name);
+pub fn player_join(env: &mut JNIEnv, class: &JObject, name: String, server: String) {
     let msg = Message {
-        event:
+        event: PLAYER_JOINED,
+        data: MessageData {
+            player: Some(name),
+            server: Some(server),
+            ..MessageData::default()
+        },
     };
-    send(env, class, "Hello from Rust!".to_string());
+    match send(env, class, msg){
+        Ok(_) => {},
+        Err(err) => warn(env, class, format!("Error sending player join message: {}", err)),
+    };
 }
 
-fn player_leave(env: &mut JNIEnv, class: &JObject, name: String) {
-    println!("Player left: {}", name);
+pub fn player_leave(env: &mut JNIEnv, class: &JObject, name: String, server: String) {
+    let msg = Message {
+        event: PLAYER_LEFT,
+        data: MessageData {
+            player: Some(name),
+            server: Some(server),
+            ..MessageData::default()
+        },
+    };
+    match send(env, class, msg){
+        Ok(_) => {},
+        Err(err) => warn(env, class, format!("Error sending player left message: {}", err)),
+    };
+
 }
 
-fn player_chat(env: &mut JNIEnv, class: &JObject, name: String, message: String) {
-    println!("Player chat: {} - {}", name, message);
+pub fn player_chat(env: &mut JNIEnv, class: &JObject, name: String, message: String, server: String) {
+    let msg = Message {
+        event: CHAT_MESSAGE,
+        data: MessageData {
+            player: Some(name),
+            message: Some(message),
+            server: Some(server),
+            ..MessageData::default()
+        },
+    };
+
+    match send(env, class, msg){
+        Ok(_) => {},
+        Err(err) => warn(env, class, format!("Error sending chat message: {}", err)),
+    };
 }

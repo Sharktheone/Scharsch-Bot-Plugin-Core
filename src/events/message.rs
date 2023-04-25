@@ -39,4 +39,5 @@ pub struct MessageData {
     pub password: Option<String>,
     pub user: Option<String>,
     pub error: Option<String>,
+    pub server: Option<String>,
 }
