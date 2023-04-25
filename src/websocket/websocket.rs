@@ -1,8 +1,9 @@
 use jni::JNIEnv;
 use jni::objects::{JObject, JValue};
-use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode, Message};
+use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode};
 use crate::config::config_format::Config;
-use crate::plugin::logger::{info, warn, error};
+use crate::plugin::logger::{error};
+use crate::events::message::{Message};
 
 
 pub struct WSClient<'a> {
@@ -75,7 +76,7 @@ pub fn send(env: &mut JNIEnv, class: &JObject, msg: Message) -> std::result::Res
     match get_ws(env, class) {
         Ok(ws_ptr) => {
             let ws: &WSClient = unsafe { &*ws_ptr };
-            return match msg.clone().into_text() {
+            return match serde_json::to_string(&msg) {
                 Ok(text) => {
                     match ws.sender.send(text) {
                         Ok(_) => Ok(()),
