@@ -50,11 +50,11 @@ fn get_loggers<'a>(env: &mut JNIEnv<'a>, class: &JObject) -> Result<*const Logge
     }
 }
 
-pub fn info<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: &str) {
+pub fn info<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
     match get_loggers(env, class) {
         Ok(logger_ptr) => {
             let logger: &Logger = unsafe { &*logger_ptr };
-            match (logger.info)(msg){
+            match (logger.info)(&*msg){
                 Ok(_) => (),
                 Err(err) => {
                     eprintln!("{}", format!("Error logging info: {}", err).red());
@@ -70,11 +70,11 @@ pub fn info<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: &str) {
     }
 }
 
-pub fn warn<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: &str) {
+pub fn warn<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
     match get_loggers(env, class) {
         Ok(logger_ptr) => {
             let logger: &Logger = unsafe { &*logger_ptr };
-            match (logger.warn)(msg){
+            match (logger.warn)(&*msg){
                 Ok(_) => (),
                 Err(err) => {
                     eprintln!("{}", format!("Error logging warn: {}", err).red());
@@ -108,11 +108,11 @@ pub fn error<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
     }
 }
 
-pub fn info_no_env(msg: &str) {
+pub fn info_no_env(msg: String) {
     println!("[{} INFO] [ScharschBot/core] {}", time(), msg);
 }
 
-pub fn warn_no_env(msg: &str) {
+pub fn warn_no_env(msg: String) {
     println!("{}", format!("[{} WARN] [ScharschBot/core] {}", time(), msg).yellow());
 }
 
