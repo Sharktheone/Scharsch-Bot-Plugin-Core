@@ -1,16 +1,16 @@
 use jni::JNIEnv;
-use jni::objects::{JObject, JValue};
+use jni::objects::{JClass, JObject, JValue};
 use colored::Colorize;
 use chrono::{DateTime, Local};
 
 
 pub struct Logger<'a> {
-    info: &'a dyn Fn(&str) -> Result<(), String>,
-    warn: &'a dyn Fn(&str) -> Result<(), String>,
-    error: &'a dyn Fn(&str) -> Result<(), String>
+    info: &'a dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>,
+    warn: &'a dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>,
+    error: &'a dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>
 }
 
-pub fn set_loggers(info: &dyn Fn(&str) -> Result<(), String>, warn: &dyn Fn(&str) -> Result<(), String>, error: &dyn Fn(&str) -> Result<(), String>, env: &mut JNIEnv<'_>, class: &JObject) {
+pub fn set_loggers(info: &dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, warn: &dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, error: &dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, env: &mut JNIEnv<'_>, class: &JObject) {
     let logger: Logger = Logger {
         info,
         warn,
@@ -54,7 +54,7 @@ pub fn info<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
     match get_loggers(env, class) {
         Ok(logger_ptr) => {
             let logger: &Logger = unsafe { &*logger_ptr };
-            match (logger.info)(&*msg){
+            match (logger.info)(&*msg, env, class){
                 Ok(_) => (),
                 Err(err) => {
                     error_no_env(format!("Error logging info: {}", err));
@@ -74,7 +74,7 @@ pub fn warn<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
     match get_loggers(env, class) {
         Ok(logger_ptr) => {
             let logger: &Logger = unsafe { &*logger_ptr };
-            match (logger.warn)(&*msg){
+            match (logger.warn)(&*msg, env, class){
                 Ok(_) => (),
                 Err(err) => {
                     error_no_env(format!("Error logging warn: {}", err));
@@ -93,7 +93,7 @@ pub fn error<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
     match get_loggers(env, class) {
         Ok(logger_ptr) => {
             let logger: &Logger = unsafe { &*logger_ptr };
-            match (logger.error)(&*msg) {
+            match (logger.error)(&*msg, env, class) {
                 Ok(_) => (),
                 Err(err) => {
                     eprintln!("{}", format!("Error logging error: {}", err).red());
