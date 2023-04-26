@@ -22,7 +22,6 @@ pub const ERROR: &str = "error";
 #[derive(Debug, Deserialize, Serialize, Default)]
 pub struct Message<'a> {
     pub event: &'a str,
-    #[serde(flatten)]
     pub data: MessageData,
 
 }
