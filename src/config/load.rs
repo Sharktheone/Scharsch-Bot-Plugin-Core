@@ -2,8 +2,13 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use std::io::{ErrorKind, Write};
+use rust_embed::RustEmbed;
 use crate::config::config_format::{Config, CONFIG_PATH};
 use crate::plugin::logger::error_no_env;
+
+#[derive(RustEmbed)]
+#[folder = "embed/"]
+struct StandardConfig;
 
 pub fn load_config() -> Result<Config, String> {
     let path = Path::new(CONFIG_PATH);
@@ -18,8 +23,19 @@ pub fn load_config() -> Result<Config, String> {
                         return Err(format!("Error creating config file: {}", e));
                     }
                 };
+                let standard_config = match StandardConfig::get("config.json") {
+                    Some(config) => config,
+                    None => {
+                        return Err("Error getting standard config".to_string());
+                    }
+                };
 
-                File::write(&mut configfile, "<TODO: put in standard config>".as_bytes()).unwrap();
+                match configfile.write(standard_config.data.as_ref()){
+                    Ok(_) => {},
+                    Err(e) => {
+                        return Err(format!("Error writing standard config to file: {}", e));
+                    }
+                };
                 return Err("Config file not found, created new one".to_string());
             } else {
                 return Err(format!("Error opening config file: {}", e));
