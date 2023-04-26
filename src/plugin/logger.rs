@@ -4,13 +4,13 @@ use colored::Colorize;
 use chrono::{DateTime, Local};
 
 
-pub struct Logger {
-    info: fn(&str) -> Result<(), String>,
-    warn: fn(&str) -> Result<(), String>,
-    error: fn(&str) -> Result<(), String>,
+pub struct Logger<'a> {
+    info: &'a dyn Fn(&str) -> Result<(), String>,
+    warn: &'a dyn Fn(&str) -> Result<(), String>,
+    error: &'a dyn Fn(&str) -> Result<(), String>
 }
 
-pub fn set_loggers(info: fn(&str) -> Result<(), String>, warn: fn(&str) -> Result<(), String>, error: fn(&str) -> Result<(), String>, env: &mut JNIEnv<'_>, class: &JObject) {
+pub fn set_loggers(info: &dyn Fn(&str) -> Result<(), String>, warn: &dyn Fn(&str) -> Result<(), String>, error: &dyn Fn(&str) -> Result<(), String>, env: &mut JNIEnv<'_>, class: &JObject) {
     let logger: Logger = Logger {
         info,
         warn,
@@ -31,7 +31,7 @@ fn time() -> String {
     now.format("%H:%M:%S").to_string()
 }
 
-fn get_loggers<'a>(env: &mut JNIEnv<'a>, class: &JObject) -> Result<*const Logger, String> {
+fn get_loggers<'a>(env: &mut JNIEnv<'a>, class: &JObject) -> Result<*const Logger<'a>, String> {
     match env.get_field(class, "logger_ptr", "J") {
         Ok(ptr_val) => {
             match ptr_val.j() {
