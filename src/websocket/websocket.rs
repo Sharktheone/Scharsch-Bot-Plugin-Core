@@ -80,7 +80,7 @@ fn get_ws<'a>(env: &mut JNIEnv<'a>, class:&JObject) ->std::result::Result<*const
 }
 
 pub fn connect_ws(env: &mut JNIEnv, class: &JObject, config: Config) ->std::result::Result<(), String> {
-    let url = format!("{}://{}:{}/{}", config.protocol, config.host, config.port, config.serverid);
+    let url = format!("{}://{}:{}/{}/ws", config.protocol, config.host, config.port, config.serverid);
 
     match connect(url, |sender| {
         WSClient {
