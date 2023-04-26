@@ -37,18 +37,18 @@ pub const JSTRING: &str = "Ljava/lang/String;";
 
 pub struct JniFn<'a> {
     pub name: &'a str,
-    pub input: &'a [String],
+    pub input: &'a [&'a str],
     pub output: &'a str,
     pub args: &'a [JValue<'a, 'a>],
 }
 
-pub fn assemble_signature(input: &[String], output: &String) -> String {
+pub fn assemble_signature(input: &[&str], output: &str) -> String {
     let mut signature = String::from("(");
     for i in input {
-        signature.push_str(make_signature(i).as_str());
+        signature.push_str(make_signature(&i.to_string()).as_str());
     }
     signature.push_str(")");
-    signature.push_str(make_signature(output).as_str());
+    signature.push_str(make_signature(&output.to_string()).as_str());
     return signature;
 }
 
@@ -70,7 +70,7 @@ pub fn make_signature(sig: &String) -> String {
 pub fn call_stacking<'a, 'b>(env: &mut JNIEnv<'a>, obj: JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a> {
     let mut obj = obj;
     for f in jfn {
-        let signature = assemble_signature(f.input, &f.output.to_string());
+        let signature = assemble_signature(f.input, &f.output);
         obj = match env.call_method(obj, &f.name, signature, f.args) {
             Ok(name) => name.l().unwrap(),
             Err(e) => {
