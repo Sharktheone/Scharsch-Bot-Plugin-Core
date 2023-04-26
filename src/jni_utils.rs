@@ -42,7 +42,7 @@ pub struct JniFn<'a> {
     pub args: &'a [JValue<'a, 'a>],
 }
 
-fn assemble_signature(input: &[String], output: &String) -> String {
+pub fn assemble_signature(input: &[String], output: &String) -> String {
     let mut signature = String::from("(");
     for i in input {
         signature.push_str(make_signature(i).as_str());
@@ -52,7 +52,7 @@ fn assemble_signature(input: &[String], output: &String) -> String {
     return signature;
 }
 
-fn make_signature(sig: &String) -> String {
+pub fn make_signature(sig: &String) -> String {
     let mut sig = sig.replace(".", "/");
 
     if sig.contains("/") {
