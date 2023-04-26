@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::{JClass, JObject, JValue};
+use jni::objects::{JObject, JValue};
 use colored::Colorize;
 use chrono::{DateTime, Local};
 
@@ -10,19 +10,17 @@ pub struct Logger<'a> {
     error: &'a dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>
 }
 
-pub fn set_loggers(info: &dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, warn: &dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, error: &dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, env: &mut JNIEnv<'_>, class: &JObject) {
+static mut LOGGER: Option<Logger> = None;
+
+pub fn set_loggers(info: &'static dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, warn: &'static dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, error: &'static dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, env: &mut JNIEnv<'_>, class: &JObject) {
     let logger: Logger = Logger {
         info,
         warn,
         error,
     };
 
-    let logger_ptr: *const Logger = &logger;
-    let ptr = logger_ptr as i64;
-
-    match env.set_field(class, "logger_ptr", "J", JValue::Long(ptr)) {
-        Ok(_) => (),
-        Err(err) => error_no_env(format!("Error setting logger: {}", err)),
+    unsafe {
+        LOGGER = Some(logger);
     }
 }
 
@@ -31,80 +29,60 @@ fn time() -> String {
     now.format("%H:%M:%S").to_string()
 }
 
-fn get_loggers<'a>(env: &mut JNIEnv<'a>, class: &JObject) -> Result<*const Logger<'a>, String> {
-    match env.get_field(class, "logger_ptr", "J") {
-        Ok(ptr_val) => {
-            match ptr_val.j() {
-                Ok(ptr_j) => {
-                    if ptr_j == 0 {
-                        Err("No logger pointer stored".to_string())
-                    } else {
-                        let ptr: *const Logger = ptr_j as *const Logger;
-                        Ok(ptr as *const Logger)
-                    }
-                }
-                Err(err) => Err(format!("Error getting logger pointer: {}", err)),
-            }
-        }
-        Err(err) => Err(format!("Error getting logger pointer: {}", err)),
-    }
-}
-
 pub fn info<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
-    match get_loggers(env, class) {
-        Ok(logger_ptr) => {
-            let logger: &Logger = unsafe { &*logger_ptr };
-            match (logger.info)(&*msg, env, class){
-                Ok(_) => (),
-                Err(err) => {
-                    error_no_env(format!("Error logging info: {}", err));
-                    info_no_env(msg);
-
-                },
-            };
+    unsafe {
+        match &LOGGER {
+            Some(logger) => {
+                match (logger.info)(&*msg, env, class) {
+                    Ok(_) => (),
+                    Err(err) => {
+                        error_no_env(format!("Error logging warn: {}", err));
+                        info_no_env(msg);
+                    },
+                };
+            }
+            None => {
+                info_no_env(msg);
+            },
         }
-        Err(err) => {
-            error_no_env(format!("Error getting logger: {}", err));
-            info_no_env(msg);
-        },
     }
 }
 
 pub fn warn<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
-    match get_loggers(env, class) {
-        Ok(logger_ptr) => {
-            let logger: &Logger = unsafe { &*logger_ptr };
-            match (logger.warn)(&*msg, env, class){
-                Ok(_) => (),
-                Err(err) => {
-                    error_no_env(format!("Error logging warn: {}", err));
-                    warn_no_env(msg);
-                },
-            };
+    unsafe {
+        match &LOGGER {
+            Some(logger) => {
+                match (logger.warn)(&*msg, env, class) {
+                    Ok(_) => (),
+                    Err(err) => {
+                        error_no_env(format!("Error logging warn: {}", err));
+                        warn_no_env(msg);
+                    },
+                };
+            }
+            None => {
+                warn_no_env(msg);
+            },
         }
-        Err(err) => {
-            error_no_env(format!("Error getting logger: {}", err));
-            warn_no_env(msg);
-        },
     }
 }
 
 pub fn error<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
-    match get_loggers(env, class) {
-        Ok(logger_ptr) => {
-            let logger: &Logger = unsafe { &*logger_ptr };
-            match (logger.error)(&*msg, env, class) {
-                Ok(_) => (),
-                Err(err) => {
-                    eprintln!("{}", format!("Error logging error: {}", err).red());
-                    error_no_env(msg);
-                },
-            };
+    unsafe {
+        match &LOGGER {
+            Some(logger) => {
+                match (logger.error)(&*msg, env, class) {
+                    Ok(_) => (),
+                    Err(err) => {
+                        error_no_env(format!("Error logging warn: {}", err));
+                        error_no_env(msg);
+                    },
+                };
+            }
+            None => {
+                error_no_env(msg);
+            },
         }
-        Err(err) => {
-            eprintln!("{}", format!("Error getting logger: {}", err).red());
-            error_no_env(msg);
-        },
     }
 }
 

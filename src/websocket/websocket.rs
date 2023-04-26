@@ -1,3 +1,4 @@
+use std::ops::{Deref, DerefMut};
 use jni::JNIEnv;
 use jni::objects::{JObject, JValue};
 use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode};
@@ -13,6 +14,8 @@ pub struct WSClient<'a> {
     env:&'a JNIEnv<'a>,
     class:&'a JObject<'a>,
 }
+
+// static mut WS_CLIENT: Option<WSClient> = None; TODO: Use static value for ws client
 
 impl <'a> Handler for WSClient<'a> {
     fn on_open(&mut self, _: Handshake) -> Result<()> {
