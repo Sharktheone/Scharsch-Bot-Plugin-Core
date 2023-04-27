@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::{JObject, JValue};
+use jni::objects::{JObject};
 use colored::Colorize;
 use chrono::{DateTime, Local};
 
@@ -12,7 +12,7 @@ pub struct Logger<'a> {
 
 static mut LOGGER: Option<Logger> = None;
 
-pub fn set_loggers(info: &'static dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, warn: &'static dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, error: &'static dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, env: &mut JNIEnv<'_>, class: &JObject) {
+pub fn set_loggers(info: &'static dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, warn: &'static dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>, error: &'static dyn Fn(&str, &mut JNIEnv, &JObject) -> Result<(), String>) {
     let logger: Logger = Logger {
         info,
         warn,

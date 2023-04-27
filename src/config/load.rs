@@ -16,7 +16,7 @@ pub fn load_config() -> Result<Config, String> {
     let mut config_file = match File::open(&path) {
         Ok(file) => file,
         Err(e) => {
-            if e.kind() == ErrorKind::NotFound {
+            return if e.kind() == ErrorKind::NotFound {
                 let mut configfile = match File::create(CONFIG_PATH) {
                     Ok(file) => file,
                     Err(e) => {
@@ -30,15 +30,15 @@ pub fn load_config() -> Result<Config, String> {
                     }
                 };
 
-                match configfile.write(standard_config.data.as_ref()){
+                match configfile.write(standard_config.data.as_ref()) {
                     Ok(_) => {},
                     Err(e) => {
                         return Err(format!("Error writing standard config to file: {}", e));
                     }
                 };
-                return Err("Config file not found, created new one".to_string());
+                Err("Config file not found, created new one".to_string())
             } else {
-                return Err(format!("Error opening config file: {}", e));
+                Err(format!("Error opening config file: {}", e))
             }
         },
     };

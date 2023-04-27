@@ -1,4 +1,3 @@
-use std::ops::{Deref, DerefMut};
 use jni::JNIEnv;
 use jni::objects::{JObject, JValue};
 use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode};
