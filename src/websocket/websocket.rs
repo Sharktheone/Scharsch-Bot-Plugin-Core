@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::{JObject, JValue};
+use jni::objects::{JClass, JValue};
 use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode};
 use crate::config::config_format::Config;
 use crate::plugin::logger::{error, info};
@@ -11,7 +11,7 @@ pub struct WSClient<'a> {
     user: String,
     sender: Sender,
     env:&'a JNIEnv<'a>,
-    class:&'a JObject<'a>,
+    class:&'a JClass<'a>,
 }
 
 // static mut WS_CLIENT: Option<WSClient> = None; TODO: Use static value for ws client
@@ -59,11 +59,11 @@ impl <'a> Handler for WSClient<'a> {
     }
 }
 
-fn store_ws(env: &mut JNIEnv, class:&JObject, ptr:i64) ->std::result::Result<(),jni::errors::Error>{
+fn store_ws(env: &mut JNIEnv, class: &JClass, ptr:i64) ->std::result::Result<(),jni::errors::Error>{
     env.set_field(class, "ws_ptr", "J", JValue::Long(ptr))
 }
 
-fn get_ws<'a>(env: &mut JNIEnv<'a>, class:&JObject) ->std::result::Result<*const WSClient<'a>, String>{
+fn get_ws<'a>(env: &mut JNIEnv<'a>, class: &JClass) ->std::result::Result<*const WSClient<'a>, String>{
     match env.get_field(class, "ws_ptr", "J") {
         Ok(ptr_val) => {
             match ptr_val.j(){
@@ -86,7 +86,7 @@ fn get_ws<'a>(env: &mut JNIEnv<'a>, class:&JObject) ->std::result::Result<*const
     }
 }
 
-pub fn connect_ws(env: &mut JNIEnv, class: &JObject, config: Config) ->std::result::Result<(), String> {
+pub fn connect_ws(env: &mut JNIEnv, class: &JClass, config: Config) ->std::result::Result<(), String> {
     let url = format!("{}://{}:{}/{}/ws", config.protocol, config.host, config.port, config.serverid);
 
     match connect(url, |sender| {
@@ -103,7 +103,7 @@ pub fn connect_ws(env: &mut JNIEnv, class: &JObject, config: Config) ->std::resu
     }
 }
 
-pub fn send(env: &mut JNIEnv, class: &JObject, msg: Message) -> std::result::Result<(), String> {
+pub fn send(env: &mut JNIEnv, class: &JClass, msg: Message) -> std::result::Result<(), String> {
     match get_ws(env, class) {
         Ok(ws_ptr) => {
             let ws: &WSClient = unsafe { &*ws_ptr };

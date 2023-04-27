@@ -1,5 +1,5 @@
 use jni::JNIEnv;
-use jni::objects::{JObject};
+use jni::objects::{JClass, JObject};
 use colored::Colorize;
 use chrono::{DateTime, Local};
 
@@ -29,7 +29,7 @@ fn time() -> String {
     now.format("%H:%M:%S").to_string()
 }
 
-pub fn info<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
+pub fn info<'a>(env: &mut JNIEnv<'a>, class: &JClass, msg: String) {
     unsafe {
         match &LOGGER {
             Some(logger) => {
@@ -48,7 +48,7 @@ pub fn info<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
     }
 }
 
-pub fn warn<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
+pub fn warn<'a>(env: &mut JNIEnv<'a>, class: &JClass, msg: String) {
     unsafe {
         match &LOGGER {
             Some(logger) => {
@@ -67,7 +67,7 @@ pub fn warn<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
     }
 }
 
-pub fn error<'a>(env: &mut JNIEnv<'a>, class: &JObject, msg: String) {
+pub fn error<'a>(env: &mut JNIEnv<'a>, class: &JClass, msg: String) {
     unsafe {
         match &LOGGER {
             Some(logger) => {
