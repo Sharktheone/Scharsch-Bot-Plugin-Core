@@ -22,6 +22,7 @@ impl <'a> Handler for WSClient<'a> {
         let client:*const WSClient = self;
         let client_pointer = client as i64;
         let mut env = unsafe { self.env.unsafe_clone() };
+
         info(&mut env, self.class, "Storing ws pointer".to_string());
         if let Err(err) = store_ws(&mut env, self.class, client_pointer) {
             error(&mut env, self.class, format!("Error storing ws pointer: {}", err));
