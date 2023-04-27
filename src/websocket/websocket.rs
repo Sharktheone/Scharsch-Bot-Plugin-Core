@@ -2,6 +2,7 @@ use jni::JNIEnv;
 use jni::objects::{JClass, JValue};
 use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode};
 use crate::config::config_format::Config;
+use crate::events::handler::handle_message;
 use crate::plugin::logger::{error, info};
 use crate::events::message::{Message};
 
@@ -50,6 +51,9 @@ impl <'a> Handler for WSClient<'a> {
     }
 
     fn on_message(&mut self, msg: WSMessage) -> Result<()> {
+        let mut env = unsafe { self.env.unsafe_clone() };
+
+        handle_message(msg.to_string(), &mut env, self.class);
         println!("Got message: {}", msg);
         self.sender.send(msg)
     }
