@@ -71,8 +71,12 @@ fn get_ws<'a>(env: &mut JNIEnv<'a>, class:&JObject) ->std::result::Result<*const
                     if ptr_j == 0 {
                         Err("No ws pointer stored".to_string())
                     } else {
-                        let ptr:*const WSClient = ptr_j as *const WSClient;
-                        Ok(ptr as *const WSClient)
+                        let ws_ptr:*const WSClient = ptr_j as *const WSClient;
+                        if ws_ptr.is_null() {
+                            Err("Null ws pointer".to_string())
+                        } else {
+                            Ok(ws_ptr)
+                        }
                     }
                 }
                 Err(err) => Err(format!("Error getting ws pointer: {}", err))
