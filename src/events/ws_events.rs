@@ -1,4 +1,4 @@
-// Bot => Server: SendPlayers
+// Bot => Server: SendPlayers       ✅
 // Bot => Server: KickPlayer
 // Bot => Server: ReportPlayer
 // Bot => Server: BanPlayer
@@ -8,8 +8,8 @@
 // Bot => Server: AuthSuccess
 // Bot => Server: AuthFailed
 // Bot => Server: Error
-// Bot => Server: WhitelistPlayer
-// Bot => Server: UnwhitelistPlayer
+// Bot => Server: WhitelistPlayer   ✅
+// Bot => Server: UnwhitelistPlayer ✅
 
 use jni::JNIEnv;
 use jni::objects::JClass;
@@ -84,6 +84,58 @@ pub(crate) fn send_players(env: &mut JNIEnv, class: &JClass) {
                 match send(env, class, msg) {
                     Ok(_) => {}
                     Err(err) => warn(env, class, format!(r#"Error sending: "No get players handler implemented" : {}"#, err)),
+                };
+                return;
+            }
+        }
+        Err(_) => return,
+    };
+}
+
+pub(crate) fn whitelist_add(name: String, env: &mut JNIEnv, class: &JClass) {
+    match get_handlers(env, class) {
+        Ok(handlers) => match handlers.add_whitelist {
+            Some(add_whitelist) => match (add_whitelist)(name) {
+                Ok(_) => {}
+                Err(err) => warn(env, class, format!("Error adding to whitelist: {}", err)),
+            },
+            None => {
+                let msg = Message {
+                    event: ERROR,
+                    data: MessageData {
+                        error: Some("No add whitelist handler implemented".to_string()),
+                        ..MessageData::default()
+                    },
+                };
+                match send(env, class, msg) {
+                    Ok(_) => {}
+                    Err(err) => warn(env, class, format!(r#"Error sending: "No add whitelist handler implemented" : {}"#, err)),
+                };
+                return;
+            }
+        }
+        Err(_) => return,
+    };
+}
+
+pub(crate) fn whitelist_remove(name: String, env: &mut JNIEnv, class: &JClass) {
+    match get_handlers(env, class) {
+        Ok(handlers) => match handlers.remove_whitelist {
+            Some(remove_whitelist) => match (remove_whitelist)(name) {
+                Ok(_) => {}
+                Err(err) => warn(env, class, format!("Error removing from whitelist: {}", err)),
+            },
+            None => {
+                let msg = Message {
+                    event: ERROR,
+                    data: MessageData {
+                        error: Some("No remove whitelist handler implemented".to_string()),
+                        ..MessageData::default()
+                    },
+                };
+                match send(env, class, msg) {
+                    Ok(_) => {}
+                    Err(err) => warn(env, class, format!(r#"Error sending: "No remove whitelist handler implemented" : {}"#, err)),
                 };
                 return;
             }

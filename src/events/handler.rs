@@ -9,17 +9,20 @@ pub(crate) static mut HANDLERS: Option<Handlers> = None;
 
 pub(crate) struct Handlers {
     pub(crate) get_players_handler: Option<&'static dyn Fn() -> Result<Vec<String>, String>>,
+    pub(crate) add_whitelist: Option<&'static dyn Fn(String) -> Result<(), String>>,
+    pub(crate) remove_whitelist: Option<&'static dyn Fn(String) -> Result<(), String>>
 }
 
-pub fn set_handlers(get_players_handler: Option<&'static dyn Fn() -> Result<Vec<String>, String>>) {
+pub fn set_handlers(get_players_handler: Option<&'static dyn Fn() -> Result<Vec<String>, String>>, add_whitelist: Option<&'static dyn Fn(String) -> Result<(), String>>, remove_whitelist: Option<&'static dyn Fn(String) -> Result<(), String>>) {
     let handlers: Handlers = Handlers {
         get_players_handler,
+        add_whitelist,
+        remove_whitelist
     };
 
     unsafe {
         HANDLERS = Some(handlers);
     }
-
 }
 
 pub(crate) fn handle_message(msg: String, env: &mut JNIEnv, class: &JClass) {
