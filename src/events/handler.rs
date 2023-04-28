@@ -8,10 +8,10 @@ use crate::events::ws_events::send_players;
 pub(crate) static mut HANDLERS: Option<Handlers> = None;
 
 pub(crate) struct Handlers {
-    pub(crate) get_players_handler: &'static dyn Fn() -> Result<Vec<String>, String>,
+    pub(crate) get_players_handler: Option<&'static dyn Fn() -> Result<Vec<String>, String>>,
 }
 
-pub fn set_handlers(get_players_handler: &'static dyn Fn() -> Result<Vec<String>, String>) {
+pub fn set_handlers(get_players_handler: Option<&'static dyn Fn() -> Result<Vec<String>, String>>) {
     let handlers: Handlers = Handlers {
         get_players_handler,
     };

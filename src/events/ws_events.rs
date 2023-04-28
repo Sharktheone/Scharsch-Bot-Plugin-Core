@@ -13,15 +13,37 @@
 
 use jni::JNIEnv;
 use jni::objects::JClass;
-use crate::events::handler::HANDLERS;
+use crate::events::handler::{HANDLERS, Handlers};
 use crate::events::message::{ERROR, Message, MessageData, PLAYERS};
 use crate::plugin::logger::warn;
 use crate::websocket::websocket::send;
 
-pub(crate) fn send_players(env: &mut JNIEnv, class: &JClass) {
-   unsafe {
+fn get_handlers(env: &mut JNIEnv, class: &JClass) -> Result<&'static Handlers, ()> {
+    unsafe {
         match HANDLERS.as_ref() {
-            Some(players) => match (players.get_players_handler)() {
+            Some(handlers) => Ok(handlers),
+            None => {
+                let msg = Message {
+                    event: ERROR,
+                    data: MessageData {
+                        error: Some("No handlers implemented".to_string()),
+                        ..MessageData::default()
+                    },
+                };
+                match send(env, class, msg) {
+                    Ok(_) => {},
+                    Err(err) => {warn(env, class, format!(r#"Error sending: "No handlers implemented" : {}"#, err)) },
+                };
+                Err(())
+            }
+        }
+    }
+}
+
+pub(crate) fn send_players(env: &mut JNIEnv, class: &JClass) {
+    match get_handlers(env, class) {
+        Ok(handlers) => match handlers.get_players_handler {
+            Some(get_players_handler) => match (get_players_handler)() {
                 Ok(players) => {
                     let msg = Message {
                         event: PLAYERS,
@@ -32,10 +54,10 @@ pub(crate) fn send_players(env: &mut JNIEnv, class: &JClass) {
                     };
 
                     match send(env, class, msg) {
-                        Ok(_) => {},
+                        Ok(_) => {}
                         Err(err) => warn(env, class, format!("Error sending players: {}", err)),
                     };
-                },
+                }
                 Err(err) => {
                     let msg = Message {
                         event: ERROR,
@@ -45,7 +67,7 @@ pub(crate) fn send_players(env: &mut JNIEnv, class: &JClass) {
                         },
                     };
                     match send(env, class, msg) {
-                        Ok(_) => {},
+                        Ok(_) => {}
                         Err(err) => warn(env, class, format!(r#"Error sending: "Error getting players": {}"#, err)),
                     };
                     return;
@@ -55,16 +77,17 @@ pub(crate) fn send_players(env: &mut JNIEnv, class: &JClass) {
                 let msg = Message {
                     event: ERROR,
                     data: MessageData {
-                        error: Some("No get_players_handler set".to_string()),
+                        error: Some("No get players handler implemented".to_string()),
                         ..MessageData::default()
                     },
                 };
                 match send(env, class, msg) {
-                    Ok(_) => {},
-                    Err(err) => warn(env, class, format!(r#"Error sending: "No get_players_handler set" : {}"#, err)),
+                    Ok(_) => {}
+                    Err(err) => warn(env, class, format!(r#"Error sending: "No get players handler implemented" : {}"#, err)),
                 };
                 return;
             }
         }
+        Err(_) => return,
     };
 }
