@@ -2,7 +2,7 @@ use jni::JNIEnv;
 use jni::objects::{JObject};
 use colored::Colorize;
 use chrono::{DateTime, Local};
-use crate::jni_utils::{get_env_class};
+use crate::jni_utils::{get_class};
 
 
 pub struct Logger<'a> {
@@ -30,9 +30,9 @@ fn time() -> String {
     now.format("%H:%M:%S").to_string()
 }
 
-pub fn info<'a>(msg: String) {
-    let (env, class) = match get_env_class() {
-        Ok((env, class)) => (env, class),
+pub fn info<'a>(env: &mut JNIEnv, msg: String) {
+    let class = match get_class() {
+        Ok(class) => class,
         Err(_) => return,
     };
     unsafe {
@@ -53,9 +53,9 @@ pub fn info<'a>(msg: String) {
     }
 }
 
-pub fn warn<'a>(msg: String) {
-    let (env, class) = match get_env_class() {
-        Ok((env, class)) => (env, class),
+pub fn warn<'a>(env: &mut JNIEnv, msg: String) {
+    let class = match get_class() {
+        Ok(class) => class,
         Err(_) => return,
     };
 
@@ -77,9 +77,9 @@ pub fn warn<'a>(msg: String) {
     }
 }
 
-pub fn error<'a>(msg: String) {
-    let (env, class) = match get_env_class() {
-        Ok((env, class)) => (env, class),
+pub fn error<'a>(env: &mut JNIEnv, msg: String) {
+    let class = match get_class() {
+        Ok(class) => class,
         Err(_) => return,
     };
 

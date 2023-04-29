@@ -1,7 +1,7 @@
 use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode};
 use crate::config::config_format::Config;
 use crate::events::handler::handle_message;
-use crate::plugin::logger::{error, info};
+use crate::plugin::logger::{error_no_env, info_no_env};
 use crate::events::message::{Message};
 
 
@@ -15,7 +15,7 @@ static mut WS_CLIENT: Option<WSClient> = None;
 
 impl Handler for WSClient {
     fn on_open(&mut self, _: Handshake) -> Result<()> {
-        info("Storing ws pointer".to_string());
+        info_no_env("Storing ws pointer".to_string());
 
         unsafe {
             let client = WSClient {
@@ -44,7 +44,7 @@ impl Handler for WSClient {
 
         match self.sender.send(auth){
             Ok(_) => {},
-            Err(err) => error(format!("Error sending auth message: {}", err)),
+            Err(err) => error_no_env(format!("Error sending auth message: {}", err)),
         };
         Ok(())
     }
