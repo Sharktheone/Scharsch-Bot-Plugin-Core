@@ -1,3 +1,4 @@
+use std::ops::Deref;
 use jni::objects::{JClass, JObject, JString, JValue};
 use jni::JNIEnv;
 use crate::{CLASS};
@@ -68,8 +69,9 @@ pub fn make_signature(sig: &String) -> String {
     return sig
 }
 
-pub fn call_stacking<'a, 'b>(env: &mut JNIEnv, obj: JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a> {
-    let mut obj = obj;
+pub fn call_stacking<'a, 'b>(env: &mut JNIEnv, obj: &JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a> {
+    let mut obj = unsafe { JObject::from_raw(obj.as_raw()) };
+
     for f in jfn {
         let signature = assemble_signature(f.input, &f.output);
         obj = match env.call_method(obj, &f.name, signature, f.args) {
@@ -84,8 +86,8 @@ pub fn call_stacking<'a, 'b>(env: &mut JNIEnv, obj: JObject<'b>, jfn: &[JniFn<'a
 }
 
 
-pub fn convert_string(env: &mut JNIEnv, obj: JObject) -> String {
-    match env.get_string(JString::from(obj).as_ref()) {
+pub fn convert_string(env: &mut JNIEnv, obj: &JObject) -> String {
+    match env.get_string(<&JString>::from(obj)) {
         Ok(s) => s.into(),
         Err(e) => {
             error_no_env(format!("Error getting string: {}", e));
