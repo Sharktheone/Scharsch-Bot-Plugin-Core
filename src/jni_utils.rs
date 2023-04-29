@@ -1,6 +1,6 @@
-use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString, JValue};
-use crate::{CLASS, ENV};
+use jni::JNIEnv;
+use crate::{CLASS};
 use crate::plugin::logger::{error_no_env};
 
 
@@ -68,12 +68,7 @@ pub fn make_signature(sig: &String) -> String {
     return sig
 }
 
-pub fn call_stacking<'a, 'b>(obj: JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a> {
-    let env = match get_env() {
-            Ok(env) => env,
-            Err(_) => return JObject::null(),
-        };
-
+pub fn call_stacking<'a, 'b>(env: &mut JNIEnv, obj: JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a> {
     let mut obj = obj;
     for f in jfn {
         let signature = assemble_signature(f.input, &f.output);
@@ -89,12 +84,7 @@ pub fn call_stacking<'a, 'b>(obj: JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a>
 }
 
 
-pub fn convert_string(obj: JObject) -> String {
-    let env = match get_env() {
-            Ok(env) => env,
-            Err(_) => return String::from(""),
-        };
-
+pub fn convert_string(env: &mut JNIEnv, obj: JObject) -> String {
     match env.get_string(JString::from(obj).as_ref()) {
         Ok(s) => s.into(),
         Err(e) => {
@@ -104,17 +94,17 @@ pub fn convert_string(obj: JObject) -> String {
     }
 }
 
-pub(crate) fn get_env() -> Result<&'static mut JNIEnv<'static>, ()> {
-    unsafe {
-        match ENV.as_mut() {
-            Some(env) => Ok(env),
-            None => {
-                error_no_env("No env set!".to_string());
-                Err(())
-            }
-        }
-    }
-}
+// pub(crate) fn get_env() -> Result<&'static mut JNIEnv<'static>, ()> {
+//     unsafe {
+//         match ENV.as_mut() {
+//             Some(env) => Ok(env),
+//             None => {
+//                 error_no_env("No env set!".to_string());
+//                 Err(())
+//             }
+//         }
+//     }
+// }
 
 pub(crate) fn get_class() -> Result<&'static mut JClass<'static>, ()> {
     unsafe {
@@ -128,14 +118,14 @@ pub(crate) fn get_class() -> Result<&'static mut JClass<'static>, ()> {
     }
 }
 
-pub(crate) fn get_env_class() -> Result<(&'static mut JNIEnv<'static>, &'static mut JClass<'static>), ()> {
-    unsafe {
-        match (ENV.as_mut(), CLASS.as_mut()) {
-            (Some(env), Some(class)) => Ok((env, class)),
-            _ => {
-                error_no_env("No env or class set!".to_string());
-                Err(())
-            }
-        }
-    }
-}
+// pub(crate) fn get_env_class() -> Result<(&'static mut JNIEnv<'static>, &'static mut JClass<'static>), ()> {
+//     unsafe {
+//         match (ENV.as_mut(), CLASS.as_mut()) {
+//             (Some(env), Some(class)) => Ok((env, class)),
+//             _ => {
+//                 error_no_env("No env or class set!".to_string());
+//                 Err(())
+//             }
+//         }
+//     }
+// }
