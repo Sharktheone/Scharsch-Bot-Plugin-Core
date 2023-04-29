@@ -1,5 +1,5 @@
 use crate::events::message::Message;
-use crate::plugin::logger::{error_no_env};
+use crate::plugin::logger::{error};
 use crate::events::message::{SEND_PLAYERS};
 use crate::events::ws_events::send_players;
 
@@ -27,7 +27,7 @@ pub(crate) fn handle_message(msg: String) {
     let message: Message = match serde_json::from_str(&msg) {
         Ok(message) => message,
         Err(err) => {
-            error_no_env(format!("Error parsing message: {}", err));
+            error(format!("Error parsing message: {}", err));
             return;
         }
     };
@@ -35,7 +35,7 @@ pub(crate) fn handle_message(msg: String) {
     match message.event {
         SEND_PLAYERS => send_players(),
         _ => {
-            error_no_env(format!("Unknown event: {}", message.event));
+            error(format!("Unknown event: {}", message.event));
         }
 
     }
