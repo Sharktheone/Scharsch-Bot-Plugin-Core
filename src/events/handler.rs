@@ -1,5 +1,3 @@
-use jni::JNIEnv;
-use jni::objects::{JClass};
 use crate::events::message::Message;
 use crate::plugin::logger::{error};
 use crate::events::message::{SEND_PLAYERS};
@@ -25,19 +23,19 @@ pub fn set_handlers(get_players_handler: Option<&'static dyn Fn() -> Result<Vec<
     }
 }
 
-pub(crate) fn handle_message(msg: String, env: &mut JNIEnv, class: &JClass) {
+pub(crate) fn handle_message(msg: String) {
     let message: Message = match serde_json::from_str(&msg) {
         Ok(message) => message,
         Err(err) => {
-            error(env, class, format!("Error parsing message: {}", err));
+            error(format!("Error parsing message: {}", err));
             return;
         }
     };
 
     match message.event {
-        SEND_PLAYERS => send_players(env, class),
+        SEND_PLAYERS => send_players(),
         _ => {
-            error(env, class, format!("Unknown event: {}", message.event));
+            error(format!("Unknown event: {}", message.event));
         }
 
     }
