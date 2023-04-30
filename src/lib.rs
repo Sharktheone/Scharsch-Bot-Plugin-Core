@@ -7,7 +7,13 @@ pub mod websocket;
 pub mod jni_utils;
 pub mod plugin;
 
-static mut VM: Option<JavaVM> = None;
+pub static mut VM: Option<JavaVM> = None;
+
+pub fn set_vm(vm: JavaVM) {
+    unsafe {
+        VM = Some(vm);
+    }
+}
 
 pub fn get_vm<'a>() -> Result<&'a mut JavaVM, ()> {
     unsafe {
