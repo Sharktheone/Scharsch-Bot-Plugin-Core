@@ -26,7 +26,8 @@ fn time() -> String {
     now.format("%H:%M:%S").to_string()
 }
 
-pub fn info<'a>(msg: String) {
+pub fn info<S: Into<String>>(msg: S) {
+    let msg: String = msg.into();
     unsafe {
         match &LOGGER {
             Some(logger) => {
@@ -45,7 +46,8 @@ pub fn info<'a>(msg: String) {
     }
 }
 
-pub fn warn<'a>(msg: String) {
+pub fn warn<S: Into<String>>(msg: S) {
+    let msg: String = msg.into();
     unsafe {
         match &LOGGER {
             Some(logger) => {
@@ -64,7 +66,8 @@ pub fn warn<'a>(msg: String) {
     }
 }
 
-pub fn error<'a>(msg: String) {
+pub fn error<S: Into<String>>(msg: S) {
+    let msg: String = msg.into();
     unsafe {
         match &LOGGER {
             Some(logger) => {
