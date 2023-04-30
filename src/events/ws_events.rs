@@ -14,7 +14,7 @@
 use crate::events::handler::{HANDLERS, Handlers};
 use crate::events::message::{ERROR, Message, MessageData, PLAYERS};
 use crate::plugin::logger::{warn};
-use crate::websocket::websocket::send;
+use crate::websocket::websocket::{send, AUTHENTICATED};
 
 fn get_handlers() -> Result<&'static Handlers, ()> {
     unsafe {
@@ -169,4 +169,10 @@ pub(crate) fn whitelist_remove(message: Message) {
         }
         Err(_) => return,
     };
+}
+
+pub(crate) fn auth_success(){
+    unsafe {
+        AUTHENTICATED = true;
+    }
 }

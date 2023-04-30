@@ -1,7 +1,7 @@
 use crate::events::message::Message;
 use crate::plugin::logger::{error};
-use crate::events::message::{SEND_PLAYERS, WHITELIST_ADD, WHITELIST_REMOVE};
-use crate::events::ws_events::{send_players, whitelist_add, whitelist_remove};
+use crate::events::message::{SEND_PLAYERS, WHITELIST_ADD, WHITELIST_REMOVE, AUTH_SUCCESS};
+use crate::events::ws_events::{auth_success, send_players, whitelist_add, whitelist_remove};
 
 pub(crate) static mut HANDLERS: Option<Handlers> = None;
 
@@ -36,6 +36,7 @@ pub(crate) fn handle_message(msg: String) {
         SEND_PLAYERS => send_players(),
         WHITELIST_ADD => whitelist_add(message),
         WHITELIST_REMOVE => whitelist_remove(message),
+        AUTH_SUCCESS => auth_success(),
 
         _ => {
             error(format!("Unknown event: {}", message.event));
