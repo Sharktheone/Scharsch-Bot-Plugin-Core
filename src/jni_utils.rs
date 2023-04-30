@@ -140,7 +140,7 @@ pub fn get_class<'a>() -> Result<JClass<'a>, ()> {
             return Err(());
         }
     };
-    match env.find_class("de/scharschbot/velocity/plugin/Events".to_string()) {
+    match env.find_class("de/scharschbot/velocity/plugin/Events") {
         Ok(class) => Ok(class),
         Err(err) => {
             error_no_env(format!("No class set: {}", err));
@@ -153,14 +153,12 @@ pub fn get_env_class<'a>() -> Result<(JNIEnv<'a>, JClass<'a>), ()> {
     let env = match get_env() {
         Ok(env) => env,
         Err(_) => {
-            error_no_env(format!("No env set!"));
             return Err(());
         }
     };
     let class = match get_class() {
         Ok(class) => class,
         Err(_) => {
-            error_no_env(format!("No class set!"));
             return Err(());
         }
     };
