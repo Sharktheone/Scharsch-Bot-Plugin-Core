@@ -1,7 +1,7 @@
 use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode};
 use crate::config::config_format::Config;
 use crate::events::handler::handle_message;
-use crate::plugin::logger::{error_no_env, info};
+use crate::plugin::logger::{error, warn};
 use crate::events::message::{Message};
 
 
@@ -12,12 +12,14 @@ pub struct WSClient {
 }
 
 static mut WS_CLIENT: Option<WSClient> = None;
+static mut CONNECTED: bool = false;
+static mut AUTHENTICATED: bool = false;
 
 impl Handler for WSClient {
     fn on_open(&mut self, _: Handshake) -> Result<()> {
-        info("Storing ws pointer".to_string());
-
         unsafe {
+            CONNECTED = true;
+
             let client = WSClient {
                 password: self.password.clone(),
                 user: self.user.clone(),
@@ -57,7 +59,11 @@ impl Handler for WSClient {
     }
 
     fn on_close(&mut self, code: CloseCode, reason: &str) {
-        println!("Connection closed due to ({:?}) {}", code, reason);
+        unsafe {
+            CONNECTED = false;
+            AUTHENTICATED = false;
+        }
+        warn(format!("Connection closed due to ({:?}) {}", code, reason));
     }
 }
 
@@ -71,10 +77,10 @@ fn get_ws<'a>() ->std::result::Result<&'static mut WSClient, String>{
     }
 }
 
-pub fn connect_ws(config: Config) ->std::result::Result<(), String> {
+pub fn connect_ws(config: Config) -> std::result::Result<(), String> {
     let url = format!("{}://{}:{}/{}/ws", config.protocol, config.host, config.port, config.serverid);
 
-    match connect(url, |sender| {
+    let res = match connect(url, |sender| {
         WSClient {
             password: config.password.to_string(),
             user: config.user.to_string(),
@@ -83,7 +89,10 @@ pub fn connect_ws(config: Config) ->std::result::Result<(), String> {
     }) {
         Ok(_) => Ok(()),
         Err(err) => Err(format!("Error connecting to ws: {}", err)),
-    }
+    };
+    warn("Disconnected from ws");
+
+    res
 }
 
 pub fn send(msg: Message) -> std::result::Result<(), String> {
