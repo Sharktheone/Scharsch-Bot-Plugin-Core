@@ -40,6 +40,7 @@ pub fn info<S: Into<String>>(msg: S) {
                 };
             }
             None => {
+                error_no_env("No logger set!".to_string());
                 info_no_env(msg);
             },
         }
@@ -60,6 +61,7 @@ pub fn warn<S: Into<String>>(msg: S) {
                 };
             }
             None => {
+                error_no_env("No logger set!".to_string());
                 warn_no_env(msg);
             },
         }
@@ -80,6 +82,7 @@ pub fn error<S: Into<String>>(msg: S) {
                 };
             }
             None => {
+                error_no_env("No logger set!".to_string());
                 error_no_env(msg);
             },
         }

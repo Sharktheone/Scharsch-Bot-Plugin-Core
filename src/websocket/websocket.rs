@@ -44,7 +44,7 @@ impl Handler for WSClient {
 
         match self.sender.send(auth){
             Ok(_) => {},
-            Err(err) => error_no_env(format!("Error sending auth message: {}", err)),
+            Err(err) => error(format!("Error sending auth message: {}", err)),
         };
         Ok(())
     }

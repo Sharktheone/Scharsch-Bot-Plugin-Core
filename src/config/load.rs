@@ -4,7 +4,7 @@ use std::path::Path;
 use std::io::{ErrorKind, Write};
 use rust_embed::RustEmbed;
 use crate::config::config_format::{Config, CONFIG_PATH};
-use crate::plugin::logger::error_no_env;
+use crate::plugin::logger::{error};
 
 #[derive(RustEmbed)]
 #[folder = "embed/"]
@@ -48,7 +48,7 @@ pub fn load_config() -> Result<Config, String> {
     match config_file.read_to_string(&mut config_string) {
         Ok(_) => {},
         Err(e) => {
-            error_no_env(format!("Error reading config file: {}", e));
+            error(format!("Error reading config file: {}", e));
             return Err(format!("Error reading config file: {}", e));
         }
     };
@@ -56,7 +56,7 @@ pub fn load_config() -> Result<Config, String> {
     let config: Config = match serde_json::from_str(&config_string){
         Ok(config) => config,
         Err(e) => {
-            error_no_env(format!("Error parsing config file: {}", e));
+            error(format!("Error parsing config file: {}", e));
             return Err(format!("Error parsing config file: {}", e));
         }
     };

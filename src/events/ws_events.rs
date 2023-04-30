@@ -13,7 +13,7 @@
 
 use crate::events::handler::{HANDLERS, Handlers};
 use crate::events::message::{ERROR, Message, MessageData, PLAYERS};
-use crate::plugin::logger::{warn_no_env};
+use crate::plugin::logger::{warn};
 use crate::websocket::websocket::send;
 
 fn get_handlers() -> Result<&'static Handlers, ()> {
@@ -30,7 +30,7 @@ fn get_handlers() -> Result<&'static Handlers, ()> {
                 };
                 match send( msg) {
                     Ok(_) => {},
-                    Err(err) => {warn_no_env(format!(r#"Error sending: "No handlers implemented" : {}"#, err)) },
+                    Err(err) => {warn(format!(r#"Error sending: "No handlers implemented" : {}"#, err)) },
                 };
                 Err(())
             }
@@ -53,7 +53,7 @@ pub(crate) fn send_players() {
 
                     match send(msg) {
                         Ok(_) => {}
-                        Err(err) => warn_no_env(format!("Error sending players: {}", err)),
+                        Err(err) => warn(format!("Error sending players: {}", err)),
                     };
                 }
                 Err(err) => {
@@ -66,7 +66,7 @@ pub(crate) fn send_players() {
                     };
                     match send(msg) {
                         Ok(_) => {}
-                        Err(err) => warn_no_env(format!(r#"Error sending: "Error getting players": {}"#, err)),
+                        Err(err) => warn(format!(r#"Error sending: "Error getting players": {}"#, err)),
                     };
                     return;
                 }
@@ -81,7 +81,7 @@ pub(crate) fn send_players() {
                 };
                 match send(msg) {
                     Ok(_) => {}
-                    Err(err) => warn_no_env(format!(r#"Error sending: "No get players handler implemented" : {}"#, err)),
+                    Err(err) => warn(format!(r#"Error sending: "No get players handler implemented" : {}"#, err)),
                 };
                 return;
             }
@@ -95,7 +95,7 @@ pub(crate) fn whitelist_add(name: String) {
         Ok(handlers) => match handlers.add_whitelist {
             Some(add_whitelist) => match (add_whitelist)(name) {
                 Ok(_) => {}
-                Err(err) => warn_no_env(format!("Error adding to whitelist: {}", err)),
+                Err(err) => warn(format!("Error adding to whitelist: {}", err)),
             },
             None => {
                 let msg = Message {
@@ -107,7 +107,7 @@ pub(crate) fn whitelist_add(name: String) {
                 };
                 match send(msg) {
                     Ok(_) => {}
-                    Err(err) => warn_no_env(format!(r#"Error sending: "No add whitelist handler implemented" : {}"#, err)),
+                    Err(err) => warn(format!(r#"Error sending: "No add whitelist handler implemented" : {}"#, err)),
                 };
                 return;
             }
@@ -121,7 +121,7 @@ pub(crate) fn whitelist_remove(name: String) {
         Ok(handlers) => match handlers.remove_whitelist {
             Some(remove_whitelist) => match (remove_whitelist)(name) {
                 Ok(_) => {}
-                Err(err) => warn_no_env(format!("Error removing from whitelist: {}", err)),
+                Err(err) => warn(format!("Error removing from whitelist: {}", err)),
             },
             None => {
                 let msg = Message {
@@ -133,7 +133,7 @@ pub(crate) fn whitelist_remove(name: String) {
                 };
                 match send(msg) {
                     Ok(_) => {}
-                    Err(err) => warn_no_env(format!(r#"Error sending: "No remove whitelist handler implemented" : {}"#, err)),
+                    Err(err) => warn(format!(r#"Error sending: "No remove whitelist handler implemented" : {}"#, err)),
                 };
                 return;
             }

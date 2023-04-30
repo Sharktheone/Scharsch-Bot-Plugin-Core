@@ -1,6 +1,6 @@
 use jni::objects::{JClass, JObject, JString, JValue};
 use jni::JNIEnv;
-use crate::plugin::logger::{error_no_env};
+use crate::plugin::logger::{error, error_no_env};
 use crate::{get_vm};
 
 
@@ -80,12 +80,12 @@ pub fn call_stacking<'a, 'b>(obj: &JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a
             Ok(name) => match name.l(){
                 Ok(name) => name,
                 Err(e) => {
-                    error_no_env(format!("Error calling jni method {}: {}", f.name, e));
+                    error(format!("Error calling jni method {}: {}", f.name, e));
                     return JObject::null();
                 }
             },
             Err(e) => {
-                error_no_env(format!("Error calling jni method {}: {}", f.name, e));
+                error(format!("Error calling jni method {}: {}", f.name, e));
                 return JObject::null();
             }
         };
@@ -102,23 +102,12 @@ pub fn convert_string(obj: &JObject) -> String {
     match env.get_string(<&JString>::from(obj)) {
         Ok(s) => s.into(),
         Err(e) => {
-            error_no_env(format!("Error getting string: {}", e));
+            error(format!("Error getting string: {}", e));
             return String::from("");
         }
     }
 }
 
-// pub(crate) fn get_env() -> Result<&'static mut JNIEnv<'static>, ()> {
-//     unsafe {
-//         match ENV.as_mut() {
-//             Some(env) => Ok(env),
-//             None => {
-//                 error_no_env("No env set!".to_string());
-//                 Err(())
-//             }
-//         }
-//     }
-// }
 
 pub fn get_env<'a>() -> Result<JNIEnv<'a>, ()> {
     let vm = match get_vm() {
@@ -159,28 +148,14 @@ pub fn get_env_class<'a>() -> Result<(JNIEnv<'a>, JClass<'a>), ()> {
     let env = match get_env() {
         Ok(env) => env,
         Err(_) => {
-            error_no_env(format!("No env set!"));
             return Err(());
         }
     };
     let class = match get_class() {
         Ok(class) => class,
         Err(_) => {
-            error_no_env(format!("No class set!"));
             return Err(());
         }
     };
     Ok((env, class))
 }
-
-// pub(crate) fn get_env_class() -> Result<(&'static mut JNIEnv<'static>, &'static mut JClass<'static>), ()> {
-//     unsafe {
-//         match (ENV.as_mut(), CLASS.as_mut()) {
-//             (Some(env), Some(class)) => Ok((env, class)),
-//             _ => {
-//                 error_no_env("No env or class set!".to_string());
-//                 Err(())
-//             }
-//         }
-//     }
-// }
