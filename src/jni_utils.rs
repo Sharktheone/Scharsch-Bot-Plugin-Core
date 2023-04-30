@@ -1,8 +1,7 @@
-use std::ops::Deref;
 use jni::objects::{JClass, JObject, JString, JValue};
 use jni::JNIEnv;
-use crate::{CLASS};
 use crate::plugin::logger::{error_no_env};
+use crate::{get_vm};
 
 
 #[allow(unused)]
@@ -36,7 +35,6 @@ pub const JDOUBLE: &str = "D";
 pub const JSTRING: &str = "Ljava/lang/String;";
 
 #[allow(unused)]
-
 pub struct JniFn<'a> {
     pub name: &'a str,
     pub input: &'a [&'a str],
@@ -66,10 +64,14 @@ pub fn make_signature(sig: &String) -> String {
         }
     }
 
-    return sig
+    return sig;
 }
 
-pub fn call_stacking<'a, 'b>(env: &mut JNIEnv, obj: &JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a> {
+pub fn call_stacking<'a, 'b>(obj: &JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a> {
+    let mut env = match get_env() {
+        Ok(env) => env,
+        Err(_) => return JObject::null(),
+    };
     let mut obj = unsafe { JObject::from_raw(obj.as_raw()) };
 
     for f in jfn {
@@ -82,11 +84,15 @@ pub fn call_stacking<'a, 'b>(env: &mut JNIEnv, obj: &JObject<'b>, jfn: &[JniFn<'
             }
         };
     }
-    return unsafe { JObject::from_raw(obj.as_raw()) }
+    return unsafe { JObject::from_raw(obj.as_raw()) };
 }
 
 
-pub fn convert_string(env: &mut JNIEnv, obj: &JObject) -> String {
+pub fn convert_string(obj: &JObject) -> String {
+    let mut env = match get_env() {
+        Ok(env) => env,
+        Err(_) => return String::from(""),
+    };
     match env.get_string(<&JString>::from(obj)) {
         Ok(s) => s.into(),
         Err(e) => {
@@ -108,16 +114,55 @@ pub fn convert_string(env: &mut JNIEnv, obj: &JObject) -> String {
 //     }
 // }
 
-pub(crate) fn get_class() -> Result<&'static mut JClass<'static>, ()> {
-    unsafe {
-        match CLASS.as_mut() {
-            Some(class) => Ok(class),
-            None => {
-                error_no_env("No class set!".to_string());
-                Err(())
-            }
+pub fn get_env<'a>() -> Result<JNIEnv<'a>, ()> {
+    let vm = match get_vm() {
+        Ok(vm) => vm,
+        Err(_) => {
+            error_no_env(format!("No vm set!"));
+            return Err(());
+        }
+    };
+
+    match vm.get_env() {
+        Ok(env) => Ok(env),
+        Err(err) => {
+            error_no_env(format!("Failed getting env: {}", err));
+            return Err(());
         }
     }
+}
+
+pub fn get_class<'a>() -> Result<JClass<'a>, ()> {
+    let mut env = match get_env() {
+        Ok(env) => env,
+        Err(_) => {
+            error_no_env(format!("No env set!"));
+            return Err(());
+        }
+    };
+    match env.find_class("de/scharschbot/velocity/plugin/Events") {
+        Ok(class) => Ok(class),
+        Err(err) => {
+            error_no_env(format!("No class set: {}", err));
+            return Err(());
+        }
+    }
+}
+
+pub fn get_env_class<'a>() -> Result<(JNIEnv<'a>, JClass<'a>), ()> {
+    let env = match get_env() {
+        Ok(env) => env,
+        Err(_) => {
+            return Err(());
+        }
+    };
+    let class = match get_class() {
+        Ok(class) => class,
+        Err(_) => {
+            return Err(());
+        }
+    };
+    Ok((env, class))
 }
 
 // pub(crate) fn get_env_class() -> Result<(&'static mut JNIEnv<'static>, &'static mut JClass<'static>), ()> {
