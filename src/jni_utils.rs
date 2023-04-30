@@ -77,7 +77,13 @@ pub fn call_stacking<'a, 'b>(obj: &JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a
     for f in jfn {
         let signature = assemble_signature(f.input, &f.output);
         obj = match env.call_method(obj, &f.name, signature, f.args) {
-            Ok(name) => name.l().unwrap(),
+            Ok(name) => match name.l(){
+                Ok(name) => name,
+                Err(e) => {
+                    error_no_env(format!("Error calling jni method {}: {}", f.name, e));
+                    return JObject::null();
+                }
+            },
             Err(e) => {
                 error_no_env(format!("Error calling jni method {}: {}", f.name, e));
                 return JObject::null();
@@ -143,7 +149,7 @@ pub fn get_class<'a>() -> Result<JClass<'a>, ()> {
     match env.find_class("de/scharschbot/velocity/plugin/Events") {
         Ok(class) => Ok(class),
         Err(err) => {
-            error_no_env(format!("No class set: {}", err));
+            error_no_env(format!("Error getting class: {}", err));
             return Err(());
         }
     }
@@ -153,12 +159,14 @@ pub fn get_env_class<'a>() -> Result<(JNIEnv<'a>, JClass<'a>), ()> {
     let env = match get_env() {
         Ok(env) => env,
         Err(_) => {
+            error_no_env(format!("No env set!"));
             return Err(());
         }
     };
     let class = match get_class() {
         Ok(class) => class,
         Err(_) => {
+            error_no_env(format!("No class set!"));
             return Err(());
         }
     };
