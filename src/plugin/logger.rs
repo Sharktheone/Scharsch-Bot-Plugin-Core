@@ -2,7 +2,7 @@ use jni::JNIEnv;
 use jni::objects::{JObject};
 use colored::Colorize;
 use chrono::{DateTime, Local};
-use crate::jni_utils::{get_class};
+use crate::jni_utils::{get_env_class};
 
 
 pub struct Logger<'a> {
@@ -30,15 +30,15 @@ fn time() -> String {
     now.format("%H:%M:%S").to_string()
 }
 
-pub fn info<'a>(env: &mut JNIEnv, msg: String) {
-    let class = match get_class() {
-        Ok(class) => class,
+pub fn info<'a>(msg: String) {
+    let (mut env, class) = match get_env_class() {
+        Ok(env) => env,
         Err(_) => return,
     };
     unsafe {
         match &LOGGER {
             Some(logger) => {
-                match (logger.info)(&*msg, env, class) {
+                match (logger.info)(&*msg, &mut env, &class) {
                     Ok(_) => (),
                     Err(err) => {
                         error_no_env(format!("Error logging warn: {}", err));
@@ -53,16 +53,16 @@ pub fn info<'a>(env: &mut JNIEnv, msg: String) {
     }
 }
 
-pub fn warn<'a>(env: &mut JNIEnv, msg: String) {
-    let class = match get_class() {
-        Ok(class) => class,
+pub fn warn<'a>(msg: String) {
+    let (mut env, class) = match get_env_class() {
+        Ok(env) => env,
         Err(_) => return,
     };
 
     unsafe {
         match &LOGGER {
             Some(logger) => {
-                match (logger.warn)(&*msg, env, class) {
+                match (logger.warn)(&*msg, &mut env, &class) {
                     Ok(_) => (),
                     Err(err) => {
                         error_no_env(format!("Error logging warn: {}", err));
@@ -77,16 +77,16 @@ pub fn warn<'a>(env: &mut JNIEnv, msg: String) {
     }
 }
 
-pub fn error<'a>(env: &mut JNIEnv, msg: String) {
-    let class = match get_class() {
-        Ok(class) => class,
+pub fn error<'a>(msg: String) {
+    let (mut env, class) = match get_env_class() {
+        Ok(env) => env,
         Err(_) => return,
     };
 
     unsafe {
         match &LOGGER {
             Some(logger) => {
-                match (logger.error)(&*msg, env, class) {
+                match (logger.error)(&*msg, &mut env, &class) {
                     Ok(_) => (),
                     Err(err) => {
                         error_no_env(format!("Error logging warn: {}", err));
