@@ -90,7 +90,31 @@ pub(crate) fn send_players() {
     };
 }
 
-pub(crate) fn whitelist_add(name: String) {
+pub(crate) fn get_player(message: Message) -> Result<String, ()> {
+    match message.data.player {
+        Some(player) => Ok(player),
+        None => {
+            match send(Message {
+                event: ERROR,
+                data: MessageData {
+                    error: Some("No player name provided".to_string()),
+                    ..MessageData::default()
+                },
+            }) {
+                Ok(_) => {},
+                Err(err) => { warn(format!(r#"Error sending: "No player name provided" : {}"#, err)) },
+            }
+            return Err(())
+        }
+    }
+
+}
+
+pub(crate) fn whitelist_add(message: Message) {
+    let name = match get_player(message) {
+        Ok(name) => name,
+        Err(_) => return,
+    };
     match get_handlers() {
         Ok(handlers) => match handlers.add_whitelist {
             Some(add_whitelist) => match (add_whitelist)(name) {
@@ -116,7 +140,12 @@ pub(crate) fn whitelist_add(name: String) {
     };
 }
 
-pub(crate) fn whitelist_remove(name: String) {
+pub(crate) fn whitelist_remove(message: Message) {
+    let name= match get_player(message) {
+        Ok(name) => name,
+        Err(_) => return,
+    };
+
     match get_handlers() {
         Ok(handlers) => match handlers.remove_whitelist {
             Some(remove_whitelist) => match (remove_whitelist)(name) {

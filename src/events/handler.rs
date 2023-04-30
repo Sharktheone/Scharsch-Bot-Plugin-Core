@@ -1,7 +1,7 @@
 use crate::events::message::Message;
-use crate::plugin::logger::{error_no_env};
-use crate::events::message::{SEND_PLAYERS};
-use crate::events::ws_events::send_players;
+use crate::plugin::logger::{error};
+use crate::events::message::{SEND_PLAYERS, WHITELIST_ADD, WHITELIST_REMOVE};
+use crate::events::ws_events::{send_players, whitelist_add, whitelist_remove};
 
 pub(crate) static mut HANDLERS: Option<Handlers> = None;
 
@@ -27,15 +27,18 @@ pub(crate) fn handle_message(msg: String) {
     let message: Message = match serde_json::from_str(&msg) {
         Ok(message) => message,
         Err(err) => {
-            error_no_env(format!("Error parsing message: {}", err));
+            error(format!("Error parsing message: {}", err));
             return;
         }
     };
 
     match message.event {
         SEND_PLAYERS => send_players(),
+        WHITELIST_ADD => whitelist_add(message),
+        WHITELIST_REMOVE => whitelist_remove(message),
+
         _ => {
-            error_no_env(format!("Unknown event: {}", message.event));
+            error(format!("Unknown event: {}", message.event));
         }
 
     }
