@@ -176,3 +176,55 @@ pub(crate) fn auth_success(){
         AUTHENTICATED = true;
     }
 }
+
+pub(crate) fn whitelisted_players() {
+    match get_handlers() {
+        Ok(handlers) => match handlers.whitelisted_players {
+            Some(get_whitelisted_players) => match (get_whitelisted_players)() {
+                Ok(players) => {
+                    let msg = Message {
+                        event: PLAYERS,
+                        data: MessageData {
+                            players: Some(players),
+                            ..MessageData::default()
+                        },
+                    };
+
+                    match send(msg) {
+                        Ok(_) => {}
+                        Err(err) => warn(format!("Error sending whitelisted players: {}", err)),
+                    };
+                }
+                Err(err) => {
+                    let msg = Message {
+                        event: ERROR,
+                        data: MessageData {
+                            error: Some(format!("Error getting whitelisted players: {}", err)),
+                            ..MessageData::default()
+                        },
+                    };
+                    match send(msg) {
+                        Ok(_) => {}
+                        Err(err) => warn(format!(r#"Error sending: "Error getting whitelisted players": {}"#, err)),
+                    };
+                    return;
+                }
+            },
+            None => {
+                let msg = Message {
+                    event: ERROR,
+                    data: MessageData {
+                        error: Some("No get whitelisted players handler implemented".to_string()),
+                        ..MessageData::default()
+                    },
+                };
+                match send(msg) {
+                    Ok(_) => {}
+                    Err(err) => warn(format!(r#"Error sending: "No get whitelisted players handler implemented" : {}"#, err)),
+                };
+                return;
+            }
+        }
+        Err(_) => return,
+    };
+}
