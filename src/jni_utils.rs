@@ -1,7 +1,7 @@
-use jni::objects::{JClass, JObject, JString, JValue};
+use jni::objects::{JObject, JString, JValue};
 use jni::JNIEnv;
 use crate::plugin::logger::{error, error_no_env};
-use crate::{get_vm};
+use jni::JavaVM;
 
 
 #[allow(unused)]
@@ -41,6 +41,28 @@ pub struct JniFn<'a> {
     pub output: &'a str,
     pub args: &'a [JValue<'a, 'a>],
 }
+
+pub static mut VM: Option<JavaVM> = None;
+
+pub fn set_vm(vm: JavaVM) {
+    unsafe {
+        VM = Some(vm);
+    }
+}
+
+pub fn get_vm<'a>() -> Result<&'a mut JavaVM, ()> {
+    unsafe {
+        match VM.as_mut() {
+            Some(vm) => Ok(vm),
+            None => {
+                error_no_env("No vm set!".to_string());
+                Err(())
+            }
+        }
+    }
+}
+
+
 
 pub fn assemble_signature(input: &[&str], output: &str) -> String {
     let mut signature = String::from("(");
@@ -125,37 +147,4 @@ pub fn get_env<'a>() -> Result<JNIEnv<'a>, ()> {
             return Err(());
         }
     }
-}
-
-pub fn get_class<'a>() -> Result<JClass<'a>, ()> {
-    let mut env = match get_env() {
-        Ok(env) => env,
-        Err(_) => {
-            error_no_env(format!("No env set!"));
-            return Err(());
-        }
-    };
-    match env.find_class("de/scharschbot/velocity/plugin/Events") {
-        Ok(class) => Ok(class),
-        Err(err) => {
-            error_no_env(format!("Error getting class: {}", err));
-            return Err(());
-        }
-    }
-}
-
-pub fn get_env_class<'a>() -> Result<(JNIEnv<'a>, JClass<'a>), ()> {
-    let env = match get_env() {
-        Ok(env) => env,
-        Err(_) => {
-            return Err(());
-        }
-    };
-    let class = match get_class() {
-        Ok(class) => class,
-        Err(_) => {
-            return Err(());
-        }
-    };
-    Ok((env, class))
 }
