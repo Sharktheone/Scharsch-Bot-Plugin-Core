@@ -11,9 +11,9 @@ pub struct WSClient {
     sender: Sender,
 }
 
-static mut WS_CLIENT: Option<WSClient> = None;
-static mut CONNECTED: bool = false;
-static mut AUTHENTICATED: bool = false;
+pub static mut WS_CLIENT: Option<WSClient> = None;
+pub static mut CONNECTED: bool = false;
+pub static mut AUTHENTICATED: bool = false;
 
 impl Handler for WSClient {
     fn on_open(&mut self, _: Handshake) -> Result<()> {
