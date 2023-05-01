@@ -135,7 +135,6 @@ pub fn get_env<'a>() -> Result<JNIEnv<'a>, ()> {
     let vm = match get_vm() {
         Ok(vm) => vm,
         Err(_) => {
-            error_no_env(format!("No vm set!"));
             return Err(());
         }
     };
