@@ -110,6 +110,30 @@ pub(crate) fn get_player(message: Message) -> Result<String, ()> {
 
 }
 
+pub(crate) fn kick_player(message: Message) {
+
+}
+
+pub(crate) fn report_player(message: Message) {
+
+}
+
+pub(crate) fn ban_player(message: Message) {
+
+}
+
+pub(crate) fn unban_player(message: Message) {
+
+}
+
+pub(crate) fn send_command(message: Message) {
+
+}
+
+pub(crate) fn send_chat_message(message: Message) {
+
+}
+
 pub(crate) fn whitelist_add(message: Message) {
     let name = match get_player(message) {
         Ok(name) => name,
@@ -171,12 +195,6 @@ pub(crate) fn whitelist_remove(message: Message) {
     };
 }
 
-pub(crate) fn auth_success(){
-    unsafe {
-        AUTHENTICATED = true;
-    }
-}
-
 pub(crate) fn whitelisted_players() {
     match get_handlers() {
         Ok(handlers) => match handlers.whitelisted_players {
@@ -227,4 +245,18 @@ pub(crate) fn whitelisted_players() {
         }
         Err(_) => return,
     };
+}
+
+
+pub(crate) fn auth_success(){
+    unsafe {
+        AUTHENTICATED = true;
+    }
+}
+
+
+pub(crate) fn auth_failed(){
+    unsafe {
+        AUTHENTICATED = false;
+    }
 }
