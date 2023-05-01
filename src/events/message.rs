@@ -22,14 +22,14 @@ pub const AUTH_FAILED: &str = "authFailed";
 pub const ERROR: &str = "error";
 
 
-#[derive(Debug, Deserialize, Serialize, Default)]
+#[derive(Debug, Deserialize, Serialize, Default, Clone)]
 pub struct Message<'a> {
     pub event: &'a str,
     pub data: MessageData,
 
 }
 
-#[derive(Debug, Deserialize, Serialize, Default)]
+#[derive(Debug, Deserialize, Serialize, Default, Clone)]
 pub struct MessageData {
     pub players: Option<Vec<String>>,
     pub player: Option<String>,
