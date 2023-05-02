@@ -1,3 +1,1 @@
-// pub mod parse;
-pub mod events;
-mod component;
+pub mod parse;
