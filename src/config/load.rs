@@ -24,6 +24,7 @@ pub fn load_config() -> Result<Config, String> {
                 let dir = match path.parent() {
                     Some(dir) => dir,
                     None => {
+                        print_disabled();
                         return Err("Error getting config directory".to_string());
                     }
                 };
@@ -31,16 +32,19 @@ pub fn load_config() -> Result<Config, String> {
                     Ok(_) => match File::create(path) {
                         Ok(file) => file,
                         Err(e) => {
+                            print_disabled();
                             return Err(format!("Error creating config file: {}", e));
                         },
                     },
                     Err(e) => {
+                        print_disabled();
                         return Err(format!("Error creating plugin directory: {}", e));
                     }
                 };
                 let standard_config = match StandardConfig::get("config.json") {
                     Some(config) => config,
                     None => {
+                        print_disabled();
                         return Err("Error getting standard config".to_string());
                     }
                 };
@@ -48,6 +52,7 @@ pub fn load_config() -> Result<Config, String> {
                 match configfile.write(standard_config.data.as_ref()) {
                     Ok(_) => {},
                     Err(e) => {
+                        print_disabled();
                         return Err(format!("Error writing standard config to file: {}", e));
                     }
                 };
@@ -59,6 +64,7 @@ pub fn load_config() -> Result<Config, String> {
                 error("╰─────────────────────────────────────────────────────────────────╯");
                 Err("Config file not found, created new one".to_string())
             } else {
+                print_disabled();
                 Err(format!("Error opening config file: {}", e))
             }
         },
@@ -69,7 +75,7 @@ pub fn load_config() -> Result<Config, String> {
     match config_file.read_to_string(&mut config_string) {
         Ok(_) => {},
         Err(e) => {
-            error(format!("Error reading config file: {}", e));
+            print_disabled();
             return Err(format!("Error reading config file: {}", e));
         }
     };
@@ -78,7 +84,10 @@ pub fn load_config() -> Result<Config, String> {
         Ok(config) => config,
         Err(e) => {
             error(format!("Error parsing config file: {}", e));
-            return Err(format!("Error parsing config file: {}", e));
+            return {
+                print_disabled();
+                Err(format!("Error parsing config file: {}", e))
+            };
         }
     };
     unsafe {
@@ -86,4 +95,17 @@ pub fn load_config() -> Result<Config, String> {
         CONFIG_LOADED = true;
     }
     return Ok(config);
+}
+
+fn print_disabled() {
+
+    let msg = r#"
+    ╭─────────────────────────────────────────────────────────────────╮
+    │                                                                 │
+    │                   Failed to load config file!                   │
+    │       Please edit the config file and restart the server!       │
+    │                                                                 │
+    ╰─────────────────────────────────────────────────────────────────╯"#;
+
+    error(msg);
 }
