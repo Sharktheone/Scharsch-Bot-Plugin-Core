@@ -56,12 +56,16 @@ pub fn load_config() -> Result<Config, String> {
                         return Err(format!("Error writing standard config to file: {}", e));
                     }
                 };
-                error("╭─────────────────────────────────────────────────────────────────╮");
-                error("│                                                                 │");
-                error("│           Config file not found, created new one                │");
-                error("│       Please edit the config file and restart the server        │");
-                error("│                                                                 │");
-                error("╰─────────────────────────────────────────────────────────────────╯");
+                let msg = r#"
+╭─────────────────────────────────────────────────────────────────╮
+│                                                                 │
+│             Config file not found, created new one!             │
+│       Please edit the config file and restart the server!       │
+│                                                                 │
+╰─────────────────────────────────────────────────────────────────╯"#;
+
+                error(msg);
+
                 Err("Config file not found, created new one".to_string())
             } else {
                 print_disabled();
