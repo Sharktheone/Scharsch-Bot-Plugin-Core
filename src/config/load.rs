@@ -10,6 +10,9 @@ use crate::plugin::logger::{error};
 #[folder = "embed/"]
 struct StandardConfig;
 
+pub static mut CONFIG: Option<Config> = None;
+pub static mut CONFIG_LOADED: bool = false;
+
 pub fn load_config() -> Result<Config, String> {
     let path = Path::new(CONFIG_PATH);
 
@@ -78,5 +81,9 @@ pub fn load_config() -> Result<Config, String> {
             return Err(format!("Error parsing config file: {}", e));
         }
     };
+    unsafe {
+        CONFIG = Some(config.clone());
+        CONFIG_LOADED = true;
+    }
     return Ok(config);
 }
