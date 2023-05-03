@@ -1,5 +1,6 @@
 use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode};
 use crate::config::config_format::Config;
+use crate::config::load::CONFIG;
 use crate::events::handler::handle_message;
 use crate::plugin::logger::{error, warn};
 use crate::events::message::{Message};
@@ -77,7 +78,16 @@ fn get_ws<'a>() ->std::result::Result<&'static mut WSClient, String>{
     }
 }
 
-pub fn connect_ws(config: Config) -> std::result::Result<(), String> {
+pub fn connect_ws() -> std::result::Result<(), String> {
+    let config = unsafe {
+        match CONFIG.clone() {
+            Some(config) => config,
+            None => {
+                return Err("No config".to_string());
+            }
+        }
+    };
+
     let url = format!("{}://{}:{}/{}/ws", config.protocol, config.host, config.port, config.serverid);
 
     let res = match connect(url, |sender| {
