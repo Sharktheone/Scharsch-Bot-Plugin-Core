@@ -57,12 +57,12 @@ pub fn load_config() -> Result<Config, String> {
                     }
                 };
                 let msg = r#"
-╭─────────────────────────────────────────────────────────────────╮
-│                                                                 │
-│             Config file not found, created new one!             │
-│       Please edit the config file and restart the server!       │
-│                                                                 │
-╰─────────────────────────────────────────────────────────────────╯"#;
+    ╭─────────────────────────────────────────────────────────────────╮
+    │                                                                 │
+    │             Config file not found, created new one!             │
+    │       Please edit the config file and restart the server!       │
+    │                                                                 │
+    ╰─────────────────────────────────────────────────────────────────╯"#;
 
                 error(msg);
 
