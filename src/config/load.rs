@@ -17,10 +17,22 @@ pub fn load_config() -> Result<Config, String> {
         Ok(file) => file,
         Err(e) => {
             return if e.kind() == ErrorKind::NotFound {
-                let mut configfile = match File::create(CONFIG_PATH) {
-                    Ok(file) => file,
+                let path = Path::new(CONFIG_PATH);
+                let dir = match path.parent() {
+                    Some(dir) => dir,
+                    None => {
+                        return Err("Error getting config directory".to_string());
+                    }
+                };
+                let mut configfile = match std::fs::create_dir_all(dir) {
+                    Ok(_) => match File::create(path) {
+                        Ok(file) => file,
+                        Err(e) => {
+                            return Err(format!("Error creating config file: {}", e));
+                        },
+                    },
                     Err(e) => {
-                        return Err(format!("Error creating config file: {}", e));
+                        return Err(format!("Error creating plugin directory: {}", e));
                     }
                 };
                 let standard_config = match StandardConfig::get("config.json") {
@@ -36,6 +48,12 @@ pub fn load_config() -> Result<Config, String> {
                         return Err(format!("Error writing standard config to file: {}", e));
                     }
                 };
+                error("╭─────────────────────────────────────────────────────────────────╮");
+                error("│                                                                 │");
+                error("│           Config file not found, created new one                │");
+                error("│       Please edit the config file and restart the server        │");
+                error("│                                                                 │");
+                error("╰─────────────────────────────────────────────────────────────────╯");
                 Err("Config file not found, created new one".to_string())
             } else {
                 Err(format!("Error opening config file: {}", e))
