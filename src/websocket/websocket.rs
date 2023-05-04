@@ -1,4 +1,7 @@
-use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode};
+use std::io::ErrorKind::ConnectionRefused;
+use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode, Request, Response, Error};
+use ws::ErrorKind::Internal;
+use ws::util::{Timeout, Token};
 use crate::config::config_format::Config;
 use crate::config::load::CONFIG;
 use crate::events::handler::handle_message;
@@ -66,6 +69,14 @@ impl Handler for WSClient {
         }
         warn(format!("Connection closed due to ({:?}) {}", code, reason));
     }
+
+    fn on_error(&mut self, err: Error) {
+        if err.to_string() == "connection refused" {
+            print_connection_refused();
+            return
+        }
+        error(format!("Error: {}", err.to_string()));
+    }
 }
 
 
@@ -122,4 +133,17 @@ pub fn send(msg: Message) -> std::result::Result<(), String> {
         }
         Err(err) => Err(format!("Error getting ws: {}", err)),
     }
+}
+
+fn print_connection_refused() {
+    let msg = r#"
+    ╭─────────────────────────────────────────────────────────────────╮
+    │                                                                 │
+    │                  Websocket connection refused!                  │
+    │              Failed to connect to the bot websocket,            │
+    │                    please check your config!                    │
+    │                                                                 │
+    ╰─────────────────────────────────────────────────────────────────╯"#;
+
+    error(msg);
 }
