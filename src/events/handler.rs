@@ -12,7 +12,7 @@ pub(crate) struct Handlers {
     pub(crate) send_command: Option<&'static dyn Fn(String) -> Result<(), String>>,
     pub(crate) send_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
     pub(crate) send_admin_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    pub(crate) add_whitelist: Option<&'static dyn Fn(String) -> Result<(), String>>,
+    pub(crate) add_whitelist: Option<&'static dyn Fn(String, String) -> Result<(), String>>,
     pub(crate) remove_whitelist: Option<&'static dyn Fn(String) -> Result<(), String>>,
     pub(crate) whitelisted_players: Option<&'static dyn Fn() -> Result<Vec<String>, String>>
 }

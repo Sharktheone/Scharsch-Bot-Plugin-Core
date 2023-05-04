@@ -107,8 +107,27 @@ pub(crate) fn get_player(message: Message) -> Result<String, ()> {
             return Err(())
         }
     }
-
 }
+
+pub(crate) fn get_uuid(message: Message) -> Result<String, ()> {
+    match message.data.uuid {
+        Some(uuid) => Ok(uuid),
+        None => {
+            match send(Message {
+                event: ERROR,
+                data: MessageData {
+                    error: Some("No player uuid provided".to_string()),
+                    ..MessageData::default()
+                },
+            }) {
+                Ok(_) => {},
+                Err(err) => { warn(format!(r#"Error sending: "No player uuid provided" : {}"#, err)) },
+            }
+            return Err(())
+        }
+    }
+}
+
 
 pub(crate) fn kick_player(message: Message) {
     match get_handlers() {
@@ -351,13 +370,19 @@ pub(crate) fn send_chat_message(message: Message) {
 }
 
 pub(crate) fn whitelist_add(message: Message) {
-    let name = match get_player(message) {
+    let name = match get_player(message.clone()) {
         Ok(name) => name,
         Err(_) => return,
     };
+    let uuid = match get_uuid(message.clone()) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return;
+        }
+    };
     match get_handlers() {
         Ok(handlers) => match handlers.add_whitelist {
-            Some(add_whitelist) => match (add_whitelist)(name) {
+            Some(add_whitelist) => match (add_whitelist)(name, uuid) {
                 Ok(_) => {}
                 Err(err) => warn(format!("Error adding to whitelist: {}", err)),
             },
