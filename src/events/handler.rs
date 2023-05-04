@@ -25,7 +25,7 @@ pub fn set_handlers(
     send_command: Option<&'static dyn Fn(String) -> Result<(), String>>,
     send_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
     send_admin_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    add_whitelist: Option<&'static dyn Fn(String) -> Result<(), String>>,
+    add_whitelist: Option<&'static dyn Fn(String, String) -> Result<(), String>>,
     remove_whitelist: Option<&'static dyn Fn(String) -> Result<(), String>>,
     whitelisted_players: Option<&'static dyn Fn() -> Result<Vec<String>, String>>,
 
