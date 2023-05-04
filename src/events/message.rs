@@ -33,6 +33,7 @@ pub struct Message<'a> {
 pub struct MessageData {
     pub players: Option<Vec<String>>,
     pub player: Option<String>,
+    pub uuid: Option<String>,
     pub reason: Option<String>,
     pub command: Option<String>,
     pub message: Option<String>,
