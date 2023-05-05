@@ -1,5 +1,6 @@
 use std::io::ErrorKind::ConnectionRefused;
-use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode, Request, Response, Error};
+use url::Url;
+use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode, Request, Response, Error, WebSocket};
 use ws::ErrorKind::Internal;
 use ws::util::{Timeout, Token};
 use crate::config::config_format::Config;
@@ -73,9 +74,9 @@ impl Handler for WSClient {
     fn on_error(&mut self, err: Error) {
         if err.to_string() == "connection refused" {
             print_connection_refused();
-            return
+        } else {
+            error(format!("Error: {}", err.to_string()));
         }
-        error(format!("Error: {}", err.to_string()));
     }
 }
 
@@ -99,21 +100,38 @@ pub fn connect_ws() -> std::result::Result<(), String> {
         }
     };
 
-    let url = format!("{}://{}:{}/{}/ws", config.protocol, config.host, config.port, config.serverid);
+    let url_str = format!("{}://{}:{}/{}/ws", config.protocol, config.host, config.port, config.serverid);
 
-    let res = match connect(url, |sender| {
+    let url = match Url::parse(&url_str) {
+        Ok(url) => url,
+        Err(err) => {
+            return Err(format!("Error parsing url: {}", err));
+        }
+    };
+
+    let mut websocket = match WebSocket::new(|sender: Sender| {
         WSClient {
             password: config.password.to_string(),
             user: config.user.to_string(),
             sender,
         }
-    }) {
-        Ok(_) => Ok(()),
-        Err(err) => Err(format!("Error connecting to ws: {}", err)),
+    }){
+        Ok(ws) => ws,
+        Err(err) => {
+            return Err(format!("Error creating websocket: {}", err));
+        }
     };
-    warn("Disconnected from ws");
 
-    res
+    match websocket.connect(url) {
+        Ok(_) => {
+            warn("Disconnected from ws");
+            Ok(())
+        },
+        Err(err) => {
+            warn("Disconnected from ws");
+            Err(format!("Error connecting to ws: {}", err))
+        },
+    }
 }
 
 pub fn send(msg: Message) -> std::result::Result<(), String> {
