@@ -1,9 +1,0 @@
-{
-  "protocol": "ws",
-  "host": "localhost",
-  "port": 8080,
-  "serverid": "<serverID>",
-  "user": "<user>",
-  "password": "<password>",
-  "servername": "<servername>"
-}

@@ -41,7 +41,7 @@ pub fn load_config() -> Result<Config, String> {
                         return Err(format!("Error creating plugin directory: {}", e));
                     }
                 };
-                let standard_config = match StandardConfig::get("config.json") {
+                let standard_config = match StandardConfig::get("config.yml") {
                     Some(config) => config,
                     None => {
                         print_disabled();
@@ -84,7 +84,7 @@ pub fn load_config() -> Result<Config, String> {
         }
     };
 
-    let config: Config = match serde_json::from_str(&config_string){
+    let config: Config = match serde_yaml::from_str(&config_string){
         Ok(config) => config,
         Err(e) => {
             error(format!("Error parsing config file: {}", e));

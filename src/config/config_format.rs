@@ -41,7 +41,7 @@ pub const PLUGIN_CONFIG_DIR: &str = combine!(
     )
 );
 
-pub const CONFIG_FILE: &str = "config.json";
+pub const CONFIG_FILE: &str = "config.yml";
 
 pub const CONFIG_PATH: &str = combine!(
     PLUGIN_CONFIG_DIR,
