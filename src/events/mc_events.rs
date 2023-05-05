@@ -1,4 +1,4 @@
-use crate::events::message::{CHAT_MESSAGE, Message, MessageData, PLAYER_ADVANCEMENT, PLAYER_JOINED, PLAYER_LEFT};
+use crate::events::message::{CHAT_MESSAGE, Message, MessageData, PLAYER_ADVANCEMENT, PLAYER_DEATH, PLAYER_JOINED, PLAYER_LEFT};
 use crate::plugin::logger::{warn};
 use crate::websocket::websocket::send;
 
@@ -52,7 +52,7 @@ pub fn player_chat(name: String, message: String, server: String) {
 
 pub fn player_death(name: String, death_message: String, server: String) {
     let msg = Message {
-        event: CHAT_MESSAGE,
+        event: PLAYER_DEATH,
         data: MessageData {
             player: Some(name),
             death_message: Some(death_message),
