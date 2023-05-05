@@ -100,29 +100,15 @@ pub fn connect_ws() -> std::result::Result<(), String> {
         }
     };
 
-    let url_str = format!("{}://{}:{}/{}/ws", config.protocol, config.host, config.port, config.serverid);
+    let url = format!("{}://{}:{}/{}/ws", config.protocol, config.host, config.port, config.serverid);
 
-    let url = match Url::parse(&url_str) {
-        Ok(url) => url,
-        Err(err) => {
-            return Err(format!("Error parsing url: {}", err));
-        }
-    };
-
-    let mut websocket = match WebSocket::new(|sender: Sender| {
+    match connect(url, |sender| {
         WSClient {
             password: config.password.to_string(),
             user: config.user.to_string(),
             sender,
-        }
-    }){
-        Ok(ws) => ws,
-        Err(err) => {
-            return Err(format!("Error creating websocket: {}", err));
-        }
-    };
-
-    match websocket.connect(url) {
+        }}
+        ){
         Ok(_) => {
             warn("Disconnected from ws");
             Ok(())
@@ -130,7 +116,7 @@ pub fn connect_ws() -> std::result::Result<(), String> {
         Err(err) => {
             warn("Disconnected from ws");
             Err(format!("Error connecting to ws: {}", err))
-        },
+        }
     }
 }
 
