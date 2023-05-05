@@ -1,4 +1,4 @@
-use jni::objects::{JObject, JString, JValue};
+use jni::objects::{JClass, JObject, JString, JValue};
 use jni::JNIEnv;
 use crate::plugin::logger::{error, error_no_env};
 use jni::JavaVM;
@@ -43,10 +43,16 @@ pub struct JniFn<'a> {
 }
 
 pub static mut VM: Option<JavaVM> = None;
+pub static mut CLASS: Option<JClass<'static>> = None;
 
 pub fn set_vm(vm: JavaVM) {
     unsafe {
         VM = Some(vm);
+    }
+}
+pub fn set_class(class: JClass<'static>) {
+    unsafe {
+        CLASS = Some(class);
     }
 }
 
@@ -56,6 +62,18 @@ pub fn get_vm<'a>() -> Result<&'a mut JavaVM, ()> {
             Some(vm) => Ok(vm),
             None => {
                 error_no_env("No vm set!".to_string());
+                Err(())
+            }
+        }
+    }
+}
+
+pub fn get_class() -> Result<&'static JClass<'static>, ()> {
+    unsafe {
+        match CLASS.as_ref() {
+            Some(class) => Ok(class),
+            None => {
+                error_no_env("No class set!".to_string());
                 Err(())
             }
         }
@@ -140,7 +158,15 @@ pub fn get_env<'a>() -> Result<JNIEnv<'a>, ()> {
     };
 
     match vm.get_env() {
-        Ok(env) => Ok(env),
+        Ok(env) => {
+            match env.exception_describe() {
+                Ok(_) => {}
+                Err(err) => {
+                    error(format!("Error enabling descriptions on exceptions: {}", err));
+                }
+            };
+            Ok(env)
+        },
         Err(err) => {
             error_no_env(format!("Failed getting env: {}", err));
             return Err(());
