@@ -38,6 +38,7 @@ pub struct MessageData {
     pub command: Option<String>,
     pub message: Option<String>,
     pub death_message: Option<String>,
+    pub message_is_component: Option<bool>,
     pub advancement: Option<String>,
     pub password: Option<String>,
     pub user: Option<String>,
