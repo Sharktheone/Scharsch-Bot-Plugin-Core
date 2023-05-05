@@ -1,9 +1,4 @@
-use std::io::ErrorKind::ConnectionRefused;
-use url::Url;
-use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode, Request, Response, Error, WebSocket};
-use ws::ErrorKind::Internal;
-use ws::util::{Timeout, Token};
-use crate::config::config_format::Config;
+use ws::{connect, Handler, Sender, Result, Message as WSMessage, Handshake, CloseCode, Error};
 use crate::config::load::CONFIG;
 use crate::events::handler::handle_message;
 use crate::plugin::logger::{error, warn};
