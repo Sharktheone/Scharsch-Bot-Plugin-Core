@@ -6,8 +6,8 @@ pub(crate) static mut HANDLERS: Option<Handlers> = None;
 
 pub(crate) struct Handlers {
     pub(crate) get_players_handler: Option<&'static dyn Fn() -> Result<Vec<String>, String>>,
-    pub(crate) kick_player: Option<&'static dyn Fn(String, String) -> Result<(), String>>,
-    pub(crate) ban_player: Option<&'static dyn Fn(String, String) -> Result<(), String>>,
+    pub(crate) kick_player: Option<&'static dyn Fn(String, String, bool) -> Result<(), String>>,
+    pub(crate) ban_player: Option<&'static dyn Fn(String, String, bool) -> Result<(), String>>,
     pub(crate) unban_player: Option<&'static dyn Fn(String) -> Result<(), String>>,
     pub(crate) send_command: Option<&'static dyn Fn(String) -> Result<(), String>>,
     pub(crate) send_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
@@ -19,8 +19,8 @@ pub(crate) struct Handlers {
 
 pub fn set_handlers(
     get_players_handler: Option<&'static dyn Fn() -> Result<Vec<String>, String>>,
-    kick_player: Option<&'static dyn Fn(String, String) -> Result<(), String>>,
-    ban_player: Option<&'static dyn Fn(String, String) -> Result<(), String>>,
+    kick_player: Option<&'static dyn Fn(String, String, bool) -> Result<(), String>>,
+    ban_player: Option<&'static dyn Fn(String, String, bool) -> Result<(), String>>,
     unban_player: Option<&'static dyn Fn(String) -> Result<(), String>>,
     send_command: Option<&'static dyn Fn(String) -> Result<(), String>>,
     send_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
