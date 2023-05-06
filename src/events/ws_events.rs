@@ -138,7 +138,8 @@ pub(crate) fn kick_player(message: Message) {
                     Err(_) => return,
                 };
                 let reason = message.data.reason.unwrap_or("No reason provided".to_string());
-                match (kick_player)(player, reason) {
+                let is_component = message.data.message_is_component.unwrap_or(false);
+                match (kick_player)(player, reason, is_component) {
                     Ok(_) => {}
                     Err(err) => warn(format!("Error kicking player: {}", err)),
                 }
@@ -205,8 +206,6 @@ pub(crate) fn report_player(message: Message) {
         }
         Err(_) => return,
     }
-
-
 }
 
 pub(crate) fn ban_player(message: Message) {
@@ -218,7 +217,8 @@ pub(crate) fn ban_player(message: Message) {
                     Err(_) => return,
                 };
                 let reason = message.data.reason.unwrap_or("No reason provided".to_string());
-                match (ban_player)(player, reason) {
+                let is_component = message.data.message_is_component.unwrap_or(false);
+                match (ban_player)(player, reason, is_component) {
                     Ok(_) => {}
                     Err(err) => warn(format!("Error banning player: {}", err)),
                 }
