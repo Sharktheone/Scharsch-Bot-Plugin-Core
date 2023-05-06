@@ -35,6 +35,7 @@ pub const JDOUBLE: &str = "D";
 pub const JSTRING: &str = "Ljava/lang/String;";
 
 #[allow(unused)]
+#[derive(Debug, Clone, Copy)]
 pub struct JniFn<'a> {
     pub name: &'a str,
     pub input: &'a [&'a str],
@@ -50,6 +51,7 @@ pub fn set_vm(vm: JavaVM) {
         VM = Some(vm);
     }
 }
+
 pub fn set_class(class: JClass<'static>) {
     unsafe {
         CLASS = Some(class);
@@ -79,7 +81,6 @@ pub fn get_class() -> Result<&'static JClass<'static>, ()> {
         }
     }
 }
-
 
 
 pub fn assemble_signature(input: &[&str], output: &str) -> String {
@@ -117,11 +118,16 @@ pub fn call_stacking<'a, 'b>(obj: &JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a
     for f in jfn {
         let signature = assemble_signature(f.input, &f.output);
         obj = match env.call_method(obj, &f.name, signature, f.args) {
-            Ok(name) => match name.l(){
-                Ok(name) => name,
-                Err(e) => {
-                    error(format!("Error calling jni method {}: {}", f.name, e));
+            Ok(name) => {
+                if f.output == JVOID {
                     return JObject::null();
+                }
+                match name.l() {
+                    Ok(name) => name,
+                    Err(e) => {
+                        error(format!("Error converting jni method output {}: {}", f.name, e));
+                        return JObject::null();
+                    }
                 }
             },
             Err(e) => {
@@ -131,6 +137,66 @@ pub fn call_stacking<'a, 'b>(obj: &JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a
         };
     }
     return unsafe { JObject::from_raw(obj.as_raw()) };
+}
+
+pub fn call_static<'a, 'b>(class: &JClass<'b>, jfn: JniFn<'a>) -> JObject<'a> {
+    let mut env = match get_env() {
+        Ok(env) => env,
+        Err(_) => return JObject::null(),
+    };
+
+    let signature = assemble_signature(jfn.input, &jfn.output);
+
+    match env.call_static_method(class, &jfn.name, signature, jfn.args) {
+        Ok(name) => match name.l() {
+            Ok(name) => name,
+            Err(e) => {
+                error(format!("Error converting jni method output {}: {}", jfn.name, e));
+                return JObject::null();
+            }
+        },
+        Err(e) => {
+            error(format!("Error calling jni method {}: {}", jfn.name, e));
+            return JObject::null();
+        }
+    }
+}
+
+pub fn call_static_stacking<'a, 'b>(class: &JClass<'b>, jfn: &[JniFn<'a>]) -> JObject<'a> {
+    let mut env = match get_env() {
+        Ok(env) => env,
+        Err(_) => return JObject::null(),
+    };
+
+
+    let f = match jfn.get(0) {
+        Some(f) => f,
+        None => return JObject::null(),
+    };
+
+    let signature = assemble_signature(f.input, &f.output);
+
+    let obj = match env.call_static_method(class, &f.name, signature, f.args) {
+        Ok(name) => {
+            if f.output == JVOID {
+                return JObject::null();
+            }
+            match name.l() {
+                Ok(name) => name,
+                Err(e) => {
+                    error(format!("Error converting static jni method output {}: {}", f.name, e));
+                    return JObject::null();
+                }
+            }
+        }
+        Err(e) => {
+            error(format!("Error calling static jni method {}: {}", f.name, e));
+            return JObject::null();
+        }
+    };
+
+    let jfn = &jfn[1..];
+    call_stacking(&obj, jfn)
 }
 
 
@@ -144,6 +210,20 @@ pub fn convert_string(obj: &JObject) -> String {
         Err(e) => {
             error(format!("Error getting string: {}", e));
             return String::from("");
+        }
+    }
+}
+
+pub fn convert_string_or<S: Into<String>>(obj: &JObject, default: S) -> String {
+    let mut env = match get_env() {
+        Ok(env) => env,
+        Err(_) => return String::from(""),
+    };
+    match env.get_string(<&JString>::from(obj)) {
+        Ok(s) => s.into(),
+        Err(e) => {
+            error(format!("Error getting string: {}", e));
+            return default.into();
         }
     }
 }

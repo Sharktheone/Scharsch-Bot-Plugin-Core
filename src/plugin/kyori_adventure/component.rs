@@ -1,5 +1,5 @@
 use jni::objects::{JObject, JValue};
-use crate::jni_utils::{call_stacking, get_env, JniFn};
+use crate::jni_utils::{call_static, get_env, JniFn, JSTRING};
 use crate::plugin::logger::error;
 
 pub fn basic_component<'a>(text: String) -> Result<JObject<'a>, ()> {
@@ -14,7 +14,7 @@ pub fn basic_component<'a>(text: String) -> Result<JObject<'a>, ()> {
     let component = match env.find_class("net/kyori/adventure/text/Component") {
         Ok(component) => component,
         Err(err) => {
-            error(format!("Error creating component: {}", err));
+            error(format!("Error getting component: {}", err));
             return Err(());
         },
     };
@@ -28,17 +28,14 @@ pub fn basic_component<'a>(text: String) -> Result<JObject<'a>, ()> {
     };
     let text_obj = JObject::from(text_string);
     let arg: JValue = JValue::Object(&text_obj);
-
-    let fns = [
-        JniFn {
+    let fns = JniFn {
             name: "text",
-            input: &[],
-            output: "net.kyori.adventure.text.Component",
+            input: &[JSTRING],
+            output: "Lnet/kyori/adventure/text/TextComponent;",
             args: &[arg],
-        }
-    ];
+        };
 
-    let final_component = call_stacking(&component, &fns);
+    let final_component = call_static(&component, fns);
 
     unsafe {
         Ok(JObject::from_raw(final_component.as_raw()))
