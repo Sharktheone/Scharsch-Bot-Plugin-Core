@@ -231,6 +231,20 @@ pub fn convert_string_or<S: Into<String>>(obj: &JObject, default: S) -> String {
     }
 }
 
+pub fn convert_string_result(obj: &JObject) -> Result<String, ()> {
+    let mut env = match get_env() {
+        Ok(env) => env,
+        Err(_) => return Err(()),
+    };
+    match env.get_string(<&JString>::from(obj)) {
+        Ok(s) => Ok(s.into()),
+        Err(e) => {
+            error(format!("Error getting string: {}", e));
+            Err(())
+        }
+    }
+}
+
 
 pub fn get_env<'a>() -> Result<JNIEnv<'a>, ()> {
     let vm = match get_vm() {
