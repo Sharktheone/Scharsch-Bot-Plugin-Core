@@ -86,29 +86,29 @@ pub fn get_class() -> Result<&'static JClass<'static>, ()> {
 pub fn assemble_signature(input: &[&str], output: &str) -> String {
     let mut signature = String::from("(");
     for i in input {
-        signature.push_str(make_signature(&i.to_string()).as_str());
+        signature.push_str(make_signature(i).as_str());
     }
-    signature.push_str(")");
-    signature.push_str(make_signature(&output.to_string()).as_str());
-    return signature;
+    signature.push(')');
+    signature.push_str(make_signature(output).as_str());
+    signature
 }
 
-pub fn make_signature(sig: &String) -> String {
-    let mut sig = sig.replace(".", "/");
+pub fn make_signature(sig: &str) -> String {
+    let mut sig = sig.replace('.', "/");
 
-    if sig.contains("/") {
-        if !sig.starts_with("L") {
+    if sig.contains('/') {
+        if !sig.starts_with('L') {
             sig = format!("L{}", sig);
         }
-        if !sig.ends_with(";") {
+        if !sig.ends_with(';') {
             sig = format!("{};", sig);
         }
     }
 
-    return sig;
+    sig
 }
 
-pub fn call_stacking<'a, 'b>(obj: &JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a> {
+pub fn call_stacking<'a>(obj: &JObject<'a>, jfn: &[JniFn<'a>]) -> JObject<'a> {
     let mut env = match get_env() {
         Ok(env) => env,
         Err(_) => return JObject::null(),
@@ -116,8 +116,8 @@ pub fn call_stacking<'a, 'b>(obj: &JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a
     let mut obj = unsafe { JObject::from_raw(obj.as_raw()) };
 
     for f in jfn {
-        let signature = assemble_signature(f.input, &f.output);
-        obj = match env.call_method(obj, &f.name, signature, f.args) {
+        let signature = assemble_signature(f.input, f.output);
+        obj = match env.call_method(obj, f.name, signature, f.args) {
             Ok(name) => {
                 if f.output == JVOID {
                     return JObject::null();
@@ -139,15 +139,15 @@ pub fn call_stacking<'a, 'b>(obj: &JObject<'b>, jfn: &[JniFn<'a>]) -> JObject<'a
     return unsafe { JObject::from_raw(obj.as_raw()) };
 }
 
-pub fn call_static<'a, 'b>(class: &JClass<'b>, jfn: JniFn<'a>) -> JObject<'a> {
+pub fn call_static<'a>(class: &JClass<'a>, jfn: JniFn<'a>) -> JObject<'a> {
     let mut env = match get_env() {
         Ok(env) => env,
         Err(_) => return JObject::null(),
     };
 
-    let signature = assemble_signature(jfn.input, &jfn.output);
+    let signature = assemble_signature(jfn.input, jfn.output);
 
-    match env.call_static_method(class, &jfn.name, signature, jfn.args) {
+    match env.call_static_method(class, jfn.name, signature, jfn.args) {
         Ok(name) => match name.l() {
             Ok(name) => name,
             Err(e) => {
@@ -162,7 +162,7 @@ pub fn call_static<'a, 'b>(class: &JClass<'b>, jfn: JniFn<'a>) -> JObject<'a> {
     }
 }
 
-pub fn call_static_stacking<'a, 'b>(class: &JClass<'b>, jfn: &[JniFn<'a>]) -> JObject<'a> {
+pub fn call_static_stacking<'a>(class: &JClass<'a>, jfn: &[JniFn<'a>]) -> JObject<'a> {
     let mut env = match get_env() {
         Ok(env) => env,
         Err(_) => return JObject::null(),
@@ -174,9 +174,9 @@ pub fn call_static_stacking<'a, 'b>(class: &JClass<'b>, jfn: &[JniFn<'a>]) -> JO
         None => return JObject::null(),
     };
 
-    let signature = assemble_signature(f.input, &f.output);
+    let signature = assemble_signature(f.input, f.output);
 
-    let obj = match env.call_static_method(class, &f.name, signature, f.args) {
+    let obj = match env.call_static_method(class, f.name, signature, f.args) {
         Ok(name) => {
             if f.output == JVOID {
                 return JObject::null();
@@ -209,7 +209,7 @@ pub fn convert_string(obj: &JObject) -> String {
         Ok(s) => s.into(),
         Err(e) => {
             error(format!("Error getting string: {}", e));
-            return String::from("");
+            String::from("")
         }
     }
 }
@@ -223,7 +223,7 @@ pub fn convert_string_or<S: Into<String>>(obj: &JObject, default: S) -> String {
         Ok(s) => s.into(),
         Err(e) => {
             error(format!("Error getting string: {}", e));
-            return default.into();
+            default.into()
         }
     }
 }
@@ -249,7 +249,7 @@ pub fn get_env<'a>() -> Result<JNIEnv<'a>, ()> {
         },
         Err(err) => {
             error_no_env(format!("Failed getting env: {}", err));
-            return Err(());
+            Err(())
         }
     }
 }

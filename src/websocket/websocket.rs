@@ -40,8 +40,8 @@ impl Handler for WSClient {
 
         let mut auth = auth_base.to_string();
 
-        auth = auth.replace("{user}", &mut self.user);
-        auth = auth.replace("{password}", &mut self.password);
+        auth = auth.replace("{user}", &self.user);
+        auth = auth.replace("{password}", &self.password);
 
 
         match self.sender.send(auth){
@@ -70,13 +70,13 @@ impl Handler for WSClient {
         if err.to_string() == "connection refused" {
             print_connection_refused();
         } else {
-            error(format!("Error: {}", err.to_string()));
+            error(format!("Error: {}", err));
         }
     }
 }
 
 
-fn get_ws<'a>() ->std::result::Result<&'static mut WSClient, String>{
+fn get_ws() ->std::result::Result<&'static mut WSClient, String>{
     unsafe {
         match WS_CLIENT.as_mut() {
             Some(ws) => Ok(ws),
@@ -118,7 +118,7 @@ pub fn connect_ws() -> std::result::Result<(), String> {
 pub fn send(msg: Message) -> std::result::Result<(), String> {
     match get_ws() {
         Ok(client) => {
-            return match serde_json::to_string(&msg) {
+            match serde_json::to_string(&msg) {
                 Ok(text) => {
                     match client.sender.send(text) {
                         Ok(_) => Ok(()),

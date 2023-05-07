@@ -16,7 +16,7 @@ pub static mut CONFIG_LOADED: bool = false;
 pub fn load_config() -> Result<Config, String> {
     let path = Path::new(CONFIG_PATH);
 
-    let mut config_file = match File::open(&path) {
+    let mut config_file = match File::open(path) {
         Ok(file) => file,
         Err(e) => {
             return if e.kind() == ErrorKind::NotFound {
@@ -98,7 +98,7 @@ pub fn load_config() -> Result<Config, String> {
         CONFIG = Some(config.clone());
         CONFIG_LOADED = true;
     }
-    return Ok(config);
+    Ok(config)
 }
 
 fn print_disabled() {

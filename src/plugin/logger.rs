@@ -152,7 +152,7 @@ pub fn logger_pump() {
                         },
                     };
 
-                    match (log)(&*msg) {
+                    match (log)(&msg) {
                         Ok(_) => (),
                         Err(err) => {
                             error_no_env(format!("Error logging {}: {}", level, err));
@@ -178,7 +178,6 @@ fn log_no_env_level<S: Into<String>>(level: S, msg: String) {
         "error" => error_no_env(msg),
         _ => {
             error_no_env(msg);
-            return;
         },
-    };
+    }
 }
