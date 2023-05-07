@@ -35,5 +35,8 @@ let mut env = match get_env() {
 
     let final_component = call_stacking(&serializer, &fns);
 
-    Ok(JString::from(final_component))
+
+    unsafe {
+        Ok(JString::from_raw(final_component.as_raw()))
+    }
 }
