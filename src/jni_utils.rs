@@ -135,8 +135,11 @@ pub fn call_stacking<'a>(obj: &JObject<'a>, jfn: &[JniFn<'a>]) -> JObject<'a> {
                 return JObject::null();
             }
         };
+        if obj.is_null() {
+            return obj;
+        }
     }
-    return unsafe { JObject::from_raw(obj.as_raw()) };
+    obj
 }
 
 pub fn call_static<'a>(class: &JClass<'a>, jfn: JniFn<'a>) -> JObject<'a> {
