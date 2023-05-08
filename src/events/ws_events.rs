@@ -1,15 +1,4 @@
-// Bot => Server: SendPlayers       ✅
-// Bot => Server: KickPlayer
-// Bot => Server: ReportPlayer
-// Bot => Server: BanPlayer
-// Bot => Server: UnbanPlayer
-// Bot => Server: SendCommand
-// Bot => Server: SendChatMessage
-// Bot => Server: AuthSuccess
-// Bot => Server: AuthFailed
 // Bot => Server: Error
-// Bot => Server: WhitelistPlayer   ✅
-// Bot => Server: UnwhitelistPlayer ✅
 
 use crate::events::handler::{HANDLERS, Handlers};
 use crate::events::message::{ERROR, Message, MessageData, PLAYERS};
