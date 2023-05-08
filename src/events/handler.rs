@@ -4,45 +4,20 @@ use crate::events::ws_events::{send_players, kick_player, report_player, ban_pla
 
 pub(crate) static mut HANDLERS: Option<Handlers> = None;
 
-pub(crate) struct Handlers {
-    pub(crate) get_players_handler: Option<&'static dyn Fn() -> Result<Vec<String>, String>>,
-    pub(crate) kick_player: Option<&'static dyn Fn(String, String, bool) -> Result<(), String>>,
-    pub(crate) ban_player: Option<&'static dyn Fn(String, String, bool) -> Result<(), String>>,
-    pub(crate) unban_player: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    pub(crate) send_command: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    pub(crate) send_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    pub(crate) send_admin_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    pub(crate) add_whitelist: Option<&'static dyn Fn(String, String) -> Result<(), String>>,
-    pub(crate) remove_whitelist: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    pub(crate) whitelisted_players: Option<&'static dyn Fn() -> Result<Vec<String>, String>>
+pub struct Handlers {
+    pub get_players_handler: Option<&'static dyn Fn() -> Result<Vec<String>, String>>,
+    pub kick_player: Option<&'static dyn Fn(String, String, bool) -> Result<(), String>>,
+    pub ban_player: Option<&'static dyn Fn(String, String, bool) -> Result<(), String>>,
+    pub unban_player: Option<&'static dyn Fn(String) -> Result<(), String>>,
+    pub send_command: Option<&'static dyn Fn(String) -> Result<(), String>>,
+    pub send_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
+    pub send_admin_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
+    pub add_whitelist: Option<&'static dyn Fn(String, String) -> Result<(), String>>,
+    pub remove_whitelist: Option<&'static dyn Fn(String) -> Result<(), String>>,
+    pub whitelisted_players: Option<&'static dyn Fn() -> Result<Vec<String>, String>>
 }
 
-pub fn set_handlers(
-    get_players_handler: Option<&'static dyn Fn() -> Result<Vec<String>, String>>,
-    kick_player: Option<&'static dyn Fn(String, String, bool) -> Result<(), String>>,
-    ban_player: Option<&'static dyn Fn(String, String, bool) -> Result<(), String>>,
-    unban_player: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    send_command: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    send_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    send_admin_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    add_whitelist: Option<&'static dyn Fn(String, String) -> Result<(), String>>,
-    remove_whitelist: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    whitelisted_players: Option<&'static dyn Fn() -> Result<Vec<String>, String>>,
-
-) {
-    let handlers: Handlers = Handlers {
-        get_players_handler,
-        kick_player,
-        ban_player,
-        unban_player,
-        send_command,
-        send_message,
-        send_admin_message,
-        add_whitelist,
-        remove_whitelist,
-        whitelisted_players
-    };
-
+pub fn set_handlers(handlers: Handlers) {
     unsafe {
         HANDLERS = Some(handlers);
     }
