@@ -130,7 +130,7 @@ pub fn error_no_env(msg: String) {
 
 
 pub fn logger_pump() {
-    let (tx, rx): (mpsc::Sender<(String, String)>, mpsc::Receiver<(String, String)>) = mpsc::channel();
+    let (tx, rx) = mpsc::channel();
 
     unsafe {
         SENDER = Some(tx);

@@ -22,7 +22,7 @@ pub fn parse_component_to_legacy<'a>(data: String, is_component: bool) -> Result
 
        legacy_serialize(component)
    } else {
-       let mut env = match get_env() {
+       let env = match get_env() {
            Ok(env) => env,
            Err(_) => return Err(()),
        };
@@ -30,7 +30,7 @@ pub fn parse_component_to_legacy<'a>(data: String, is_component: bool) -> Result
        let data_string = match env.new_string(data) {
               Ok(data_string) => data_string,
               Err(err) => {
-                error(format!("Error creating msg string: {}", err));
+                error(format!("Error creating component string: {}", err));
                 return Err(());
               },
        };
