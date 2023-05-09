@@ -97,7 +97,11 @@ pub fn make_signature(sig: &str) -> String {
     let mut sig = sig.replace('.', "/");
 
     if sig.contains('/') {
-        if !sig.starts_with('L') {
+        if sig.starts_with('['){
+            if !sig.starts_with("[L") {
+                sig = format!("[L{}", sig[1..].to_string());
+            }
+        } else if !sig.starts_with('L') {
             sig = format!("L{}", sig);
         }
         if !sig.ends_with(';') {
