@@ -263,7 +263,7 @@ pub fn get_env<'a>() -> Result<JNIEnv<'a>, ()> {
             match env.exception_describe() {
                 Ok(_) => {}
                 Err(err) => {
-                    error(format!("Error enabling descriptions on exceptions: {}", err));
+                    error_no_env(format!("Error enabling descriptions on exceptions: {}", err));
                 }
             };
             Ok(env)
