@@ -296,12 +296,12 @@ pub(crate) fn send_chat_message(message: Message) {
                     match send(Message {
                         event: ERROR,
                         data: MessageData {
-                            error: Some("No message provided".to_string()),
+                            error: Some("No chat message provided".to_string()),
                             ..MessageData::default()
                         },
                     }) {
                         Ok(_) => {},
-                        Err(err) => { warn(format!(r#"Error sending: "No message provided" : {}"#, err)) },
+                        Err(err) => { warn(format!(r#"Error sending chat message error: "No message provided" : {}"#, err)) },
                     }
                     return;
                 }
@@ -325,8 +325,46 @@ pub(crate) fn send_chat_message(message: Message) {
             };
         }
     } }
+}
 
-
+pub(crate) fn send_admin_message(message: Message) {
+    if let Ok(handlers) = get_handlers() { match handlers.send_admin_message {
+        Some(send_admin_message) => {
+            let message = match message.data.message {
+                Some(message) => message,
+                None => {
+                    match send(Message {
+                        event: ERROR,
+                        data: MessageData {
+                            error: Some("No admin message provided".to_string()),
+                            ..MessageData::default()
+                        },
+                    }) {
+                        Ok(_) => {},
+                        Err(err) => { warn(format!(r#"Error sending admin message error: "No message provided" : {}"#, err)) },
+                    }
+                    return;
+                }
+            };
+            match (send_admin_message)(message) {
+                Ok(_) => {}
+                Err(err) => warn(format!("Error sending admin message: {}", err)),
+            }
+        }
+        None => {
+            let msg = Message {
+                event: ERROR,
+                data: MessageData {
+                    error: Some("No send admin message handler implemented".to_string()),
+                    ..MessageData::default()
+                },
+            };
+            match send(msg) {
+                Ok(_) => {}
+                Err(err) => warn(format!(r#"Error sending: "No send admin message handler implemented" : {}"#, err)),
+            };
+        }
+    } }
 }
 
 pub(crate) fn whitelist_add(message: Message) {

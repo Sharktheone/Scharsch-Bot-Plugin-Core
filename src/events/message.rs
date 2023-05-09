@@ -7,6 +7,7 @@ pub const BAN_PLAYER: &str = "banPlayer";
 pub const UNBAN_PLAYER: &str = "unbanPlayer";
 pub const SEND_COMMAND: &str = "sendCommand";
 pub const SEND_CHAT_MESSAGE: &str = "sendChatMessage";
+pub const SEND_ADMIN_MESSAGE: &str = "sendAdminMessage";
 pub const WHITELIST_ADD: &str = "whitelistAdd";
 pub const WHITELIST_REMOVE: &str = "whitelistRemove";
 pub const WHITELISTED_PLAYERS: &str = "whitelistedPlayers";

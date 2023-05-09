@@ -1,6 +1,6 @@
-use crate::events::message::{Message, SEND_PLAYERS, KICK_PLAYER, REPORT_PLAYER, BAN_PLAYER, UNBAN_PLAYER, SEND_COMMAND, SEND_CHAT_MESSAGE, WHITELIST_ADD, WHITELIST_REMOVE, WHITELISTED_PLAYERS, AUTH_SUCCESS, AUTH_FAILED};
+use crate::events::message::{Message, SEND_PLAYERS, KICK_PLAYER, REPORT_PLAYER, BAN_PLAYER, UNBAN_PLAYER, SEND_COMMAND, SEND_CHAT_MESSAGE, WHITELIST_ADD, WHITELIST_REMOVE, WHITELISTED_PLAYERS, AUTH_SUCCESS, AUTH_FAILED, SEND_ADMIN_MESSAGE};
 use crate::plugin::logger::{error};
-use crate::events::ws_events::{send_players, kick_player, report_player, ban_player, unban_player, send_command, send_chat_message, whitelist_add, whitelist_remove, whitelisted_players, auth_success, auth_failed};
+use crate::events::ws_events::{send_players, kick_player, report_player, ban_player, unban_player, send_command, send_chat_message, whitelist_add, whitelist_remove, whitelisted_players, auth_success, auth_failed, send_admin_message};
 
 pub(crate) static mut HANDLERS: Option<Handlers> = None;
 
@@ -40,6 +40,7 @@ pub(crate) fn handle_message(msg: String) {
         UNBAN_PLAYER => unban_player(message),
         SEND_COMMAND => send_command(message),
         SEND_CHAT_MESSAGE => send_chat_message(message),
+        SEND_ADMIN_MESSAGE => send_admin_message(message),
         WHITELIST_ADD => whitelist_add(message),
         WHITELIST_REMOVE => whitelist_remove(message),
         WHITELISTED_PLAYERS => whitelisted_players(),
