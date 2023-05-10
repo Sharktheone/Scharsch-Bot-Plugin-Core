@@ -147,7 +147,7 @@ pub(crate) fn kick_player(message: Message) {
 pub(crate) fn report_player(message: Message) {
     if let Ok(handlers) = get_handlers() { match handlers.send_admin_message {
         Some(send_admin_message) => {
-            let message = match message.data.message {
+            let admin_message = match message.data.message {
                 Some(message) => message,
                 None => {
                     match send(Message {
@@ -163,7 +163,9 @@ pub(crate) fn report_player(message: Message) {
                     return;
                 }
             };
-            match (send_admin_message)(message) {
+
+            let is_component = message.data.message_is_component.unwrap_or(false);
+            match (send_admin_message)(admin_message, is_component, message.data.permission) {
                 Ok(_) => {}
                 Err(err) => warn(format!("Error reporting player: {}", err)),
             }
@@ -290,7 +292,7 @@ pub(crate) fn send_command(message: Message) {
 pub(crate) fn send_chat_message(message: Message) {
     if let Ok(handlers) = get_handlers() { match handlers.send_message {
         Some(send_chat_message) => {
-            let message = match message.data.message {
+            let chat_message = match message.data.message {
                 Some(message) => message,
                 None => {
                     match send(Message {
@@ -306,7 +308,9 @@ pub(crate) fn send_chat_message(message: Message) {
                     return;
                 }
             };
-            match (send_chat_message)(message) {
+
+            let is_component = message.data.message_is_component.unwrap_or(false);
+            match (send_chat_message)(chat_message, is_component) {
                 Ok(_) => {}
                 Err(err) => warn(format!("Error sending chat message: {}", err)),
             }
@@ -330,7 +334,7 @@ pub(crate) fn send_chat_message(message: Message) {
 pub(crate) fn send_admin_message(message: Message) {
     if let Ok(handlers) = get_handlers() { match handlers.send_admin_message {
         Some(send_admin_message) => {
-            let message = match message.data.message {
+            let admin_message = match message.data.message {
                 Some(message) => message,
                 None => {
                     match send(Message {
@@ -346,7 +350,9 @@ pub(crate) fn send_admin_message(message: Message) {
                     return;
                 }
             };
-            match (send_admin_message)(message) {
+
+            let is_component = message.data.message_is_component.unwrap_or(false);
+            match (send_admin_message)(admin_message, is_component, message.data.permission) {
                 Ok(_) => {}
                 Err(err) => warn(format!("Error sending admin message: {}", err)),
             }
