@@ -42,6 +42,7 @@ pub struct MessageData {
     pub message_is_component: Option<bool>,
     pub advancement: Option<String>,
     pub password: Option<String>,
+    pub permission: Option<String>,
     pub user: Option<String>,
     pub error: Option<String>,
     pub server: Option<String>,
