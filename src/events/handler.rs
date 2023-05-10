@@ -10,8 +10,8 @@ pub struct Handlers {
     pub ban_player: Option<&'static dyn Fn(String, String, bool) -> Result<(), String>>,
     pub unban_player: Option<&'static dyn Fn(String) -> Result<(), String>>,
     pub send_command: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    pub send_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
-    pub send_admin_message: Option<&'static dyn Fn(String) -> Result<(), String>>,
+    pub send_message: Option<&'static dyn Fn(String, bool) -> Result<(), String>>,
+    pub send_admin_message: Option<&'static dyn Fn(String, bool) -> Result<(), String>>,
     pub add_whitelist: Option<&'static dyn Fn(String, String) -> Result<(), String>>,
     pub remove_whitelist: Option<&'static dyn Fn(String) -> Result<(), String>>,
     pub whitelisted_players: Option<&'static dyn Fn() -> Result<Vec<String>, String>>
